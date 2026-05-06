@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identification Palettes</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* ══════════════════════════════════════════
+       TOKENS
+    ══════════════════════════════════════════ */
+    :root {
+      --c-retour:  #ff6b35;
+      --c-doublon: #a855f7;
+      --c-attente: #f59e0b;
+      --c-um:      #ef4444;
+      --c-blue:    #3b82f6;
+      --radius:    16px;
+      --radius-sm: 10px;
+      --radius-xl: 24px;
+    }
+
+    /* ══════════════════════════════════════════
+       BASE
+    ══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 20% 10%, rgba(99,102,241,.55) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(168,85,247,.45) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 30%, rgba(59,130,246,.35) 0%, transparent 40%),
+        linear-gradient(135deg, #0d1b3e 0%, #1a0a3e 50%, #0f1d35 100%);
+      background-attachment: fixed;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* moving orb decoration */
+    body::before {
+      content: '';
+      position: fixed;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99,102,241,.18) 0%, transparent 70%);
+      top: -200px; right: -150px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168,85,247,.15) 0%, transparent 70%);
+      bottom: -100px; left: -100px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ══════════════════════════════════════════
+       GLASS MIXIN
+    ══════════════════════════════════════════ */
+    .glass {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .glass-strong {
+      background: rgba(255,255,255,.11);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+    }
+
+    /* ══════════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════════ */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-logo {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      box-shadow: 0 4px 16px rgba(99,102,241,.5);
+    }
+    .header-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -.2px;
+      background: linear-gradient(90deg, #fff 40%, rgba(255,255,255,.55));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-sub {
+      font-size: .72rem;
+      color: rgba(255,255,255,.4);
+      margin-top: 1px;
+    }
+    .header-date {
+      font-size: .78rem;
+      color: rgba(255,255,255,.5);
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 6px 14px;
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+    }
+
+    /* ══════════════════════════════════════════
+       MAIN CONTENT
+    ══════════════════════════════════════════ */
+    main {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+    }
+
+    /* ── Page intro ── */
+    .intro {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .intro h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -.5px;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #fff 30%, rgba(200,190,255,.75));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .intro p {
+      color: rgba(255,255,255,.45);
+      font-size: .88rem;
+      letter-spacing: .2px;
+    }
+
+    /* ── Step header ── */
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .step-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.2);
+      font-size: .72rem;
+      font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .step-title {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.45);
+    }
+
+    /* ══════════════════════════════════════════
+       OPTION TILES
+    ══════════════════════════════════════════ */
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .option-tile {
+      cursor: pointer;
+      padding: 22px 18px;
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 14px;
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, border-color .2s;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .option-tile::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+    .option-tile:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 12px 40px rgba(0,0,0,.3);
+    }
+    .option-tile.active {
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .option-tile[data-type="retour"]  { --tc: var(--c-retour);  --tca: rgba(255,107,53,.22);  --tcs: rgba(255,107,53,.6);  }
+    .option-tile[data-type="doublon"] { --tc: var(--c-doublon); --tca: rgba(168,85,247,.22); --tcs: rgba(168,85,247,.6); }
+    .option-tile[data-type="attente"] { --tc: var(--c-attente); --tca: rgba(245,158,11,.22); --tcs: rgba(245,158,11,.6); }
+    .option-tile[data-type="um"]      { --tc: var(--c-um);      --tca: rgba(239,68,68,.22);  --tcs: rgba(239,68,68,.6);  }
+
+    .option-tile {
+      background: rgba(255,255,255,.07);
+      border: 1.5px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(20px);
+    }
+    .option-tile.active {
+      background: var(--tca);
+      border-color: var(--tc);
+      box-shadow: 0 8px 32px var(--tca), 0 0 0 1px var(--tc);
+    }
+
+    .tile-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      background: rgba(255,255,255,.08);
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+    .option-tile.active .tile-icon {
+      background: var(--tca);
+      box-shadow: 0 4px 16px var(--tca);
+    }
+
+    .tile-text { flex: 1; }
+    .tile-label {
+      font-size: .88rem;
+      font-weight: 700;
+      color: rgba(255,255,255,.9);
+      line-height: 1.3;
+    }
+    .option-tile.active .tile-label { color: #fff; }
+    .tile-check {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.2);
+      flex-shrink: 0;
+      transition: all .2s;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+    }
+    .option-tile.active .tile-check {
+      background: var(--tc);
+      border-color: var(--tc);
+      box-shadow: 0 2px 8px var(--tcs);
+      color: #fff;
+    }
+
+    /* ══════════════════════════════════════════
+       DETAIL PANEL
+    ══════════════════════════════════════════ */
+    .detail-panel {
+      border-radius: var(--radius-xl);
+      padding: 26px 24px;
+      margin-bottom: 20px;
+      animation: popIn .25s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(.96) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .panel-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      border: 1px solid;
+    }
+    .tag-retour  { background: rgba(255,107,53,.15);  color: #ff9e72; border-color: rgba(255,107,53,.35);  }
+    .tag-doublon { background: rgba(168,85,247,.15);  color: #c084fc; border-color: rgba(168,85,247,.35);  }
+    .tag-attente { background: rgba(245,158,11,.15);  color: #fbbf24; border-color: rgba(245,158,11,.35);  }
+    .tag-um      { background: rgba(239,68,68,.15);   color: #f87171; border-color: rgba(239,68,68,.35);   }
+
+    /* ── Form ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    .field-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .9px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.45);
+    }
+    .field select,
+    .field input[type="date"] {
+      padding: 12px 16px;
+      background: rgba(255,255,255,.08);
+      border: 1.5px solid rgba(255,255,255,.14);
+      border-radius: var(--radius-sm);
+      font-size: .92rem;
+      color: #fff;
+      appearance: none;
+      outline: none;
+      backdrop-filter: blur(10px);
+      transition: border-color .15s, box-shadow .15s;
+      font-family: inherit;
+    }
+    .field select option { background: #1a1a3e; color: #fff; }
+    .field select:focus,
+    .field input:focus {
+      border-color: rgba(99,102,241,.7);
+      box-shadow: 0 0 0 3px rgba(99,102,241,.18);
+    }
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid rgba(255,255,255,.4);
+      pointer-events: none;
+    }
+    /* date input light text fix */
+    .field input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) opacity(.5);
+    }
+
+    /* ── Info box ── */
+    .info-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      font-size: .86rem;
+      line-height: 1.65;
+      color: rgba(255,255,255,.75);
+    }
+    .info-box strong {
+      display: block;
+      color: #fff;
+      font-size: .9rem;
+      margin-bottom: 3px;
+    }
+    .info-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* ══════════════════════════════════════════
+       GENERATE BUTTON
+    ══════════════════════════════════════════ */
+    .btn-generate {
+      width: 100%;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: .95rem;
+      font-weight: 800;
+      letter-spacing: .3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 24px rgba(99,102,241,.45);
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .btn-generate::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.15), transparent);
+      pointer-events: none;
+    }
+    .btn-generate:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 10px 36px rgba(99,102,241,.6);
+    }
+    .btn-generate:active { transform: translateY(0) scale(1); }
+    .btn-generate svg { width: 18px; height: 18px; }
+
+    /* ══════════════════════════════════════════
+       RESULT CARD
+    ══════════════════════════════════════════ */
+    .result-card {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      animation: popIn .3s cubic-bezier(.34,1.56,.64,1);
+      position: relative;
+    }
+
+    .result-glow {
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: var(--tc-grad);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .result-inner {
+      padding: 28px 26px 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .result-header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .result-type-icon {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    .result-type-label {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -.4px;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .result-ref {
+      font-size: .72rem;
+      font-weight: 600;
+      color: rgba(255,255,255,.4);
+      letter-spacing: .4px;
+    }
+
+    .result-divider {
+      height: 1px;
+      background: rgba(255,255,255,.1);
+      margin: 18px 0;
+    }
+
+    .result-fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .result-field {}
+    .result-field-key {
+      font-size: .66rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.4);
+      margin-bottom: 5px;
+    }
+    .result-field-val {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    /* ── Actions ── */
+    .result-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-action {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: .82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all .18s;
+      font-family: inherit;
+      letter-spacing: .2px;
+      border: 1.5px solid;
+    }
+    .btn-pdf {
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 16px rgba(99,102,241,.4);
+    }
+    .btn-pdf:hover { box-shadow: 0 6px 24px rgba(99,102,241,.55); transform: translateY(-1px); }
+    .btn-print-paper {
+      background: rgba(255,255,255,.07);
+      color: rgba(255,255,255,.75);
+      border-color: rgba(255,255,255,.15);
+      backdrop-filter: blur(10px);
+    }
+    .btn-print-paper:hover { background: rgba(255,255,255,.12); color: #fff; }
+    .btn-new {
+      background: rgba(255,255,255,.05);
+      color: rgba(255,255,255,.5);
+      border-color: rgba(255,255,255,.1);
+    }
+    .btn-new:hover { background: rgba(255,255,255,.09); color: rgba(255,255,255,.8); }
+
+    /* ══════════════════════════════════════════
+       PRINT
+    ══════════════════════════════════════════ */
+    @media print {
+      body { background: white !important; color: #000 !important; }
+      body::before, body::after { display: none; }
+      header, .intro, .step-header, .option-grid, .detail-panel,
+      .btn-generate, .result-actions { display: none !important; }
+      .result-card { box-shadow: none !important; border: 1px solid #ccc !important;
+        backdrop-filter: none !important; background: #fff !important; }
+      .result-type-label, .result-field-val { color: #000 !important; }
+      .result-field-key, .result-ref { color: #666 !important; }
+      .result-divider { background: #ddd !important; }
+    }
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════ */
+    @media (max-width: 560px) {
+      .option-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      header { padding: 16px 20px; }
+      main { padding: 24px 16px 60px; }
+      .intro h1 { font-size: 1.5rem; }
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-brand">
+    <div class="header-logo">📦</div>
+    <div>
+      <div class="header-title">Identification Palettes</div>
+      <div class="header-sub">Système d'étiquetage entrepôt</div>
+    </div>
+  </div>
+  <div class="header-date" id="top-date"></div>
+</header>
+
+<main>
+
+  <!-- INTRO -->
+  <div class="intro">
+    <h1>Identifier une palette</h1>
+    <p>Choisissez un type, renseignez les informations, générez l'étiquette.</p>
+  </div>
+
+  <!-- ÉTAPE 1 -->
+  <div class="step-header">
+    <div class="step-num">1</div>
+    <span class="step-title">Type d'identification</span>
+  </div>
+
+  <div class="option-grid">
+    <div class="option-tile" data-type="retour" onclick="selectType('retour')">
+      <div class="tile-icon">🔄</div>
+      <div class="tile-text">
+        <div class="tile-label">Retour<br>marchandise</div>
+      </div>
+      <div class="tile-check">✓</div>
+    </div>
+    <div class="option-tile" data-type="doublon" onclick="selectType('doublon')">
+      <div class="tile-icon">🔁</div>
+      <div class="tile-text">
+        <div class="tile-label">Doublon<br>silo</div>
+      </div>
+      <div class="tile-check">✓</div>
+    </div>
+    <div class="option-tile" data-type="attente" onclick="selectType('attente')">
+      <div class="tile-icon">⏳</div>
+      <div class="tile-text">
+        <div class="tile-label">En attente<br>de réception</div>
+      </div>
+      <div class="tile-check">✓</div>
+    </div>
+    <div class="option-tile" data-type="um" onclick="selectType('um')">
+      <div class="tile-icon">🔍</div>
+      <div class="tile-text">
+        <div class="tile-label">UM non trouvé<br>en entrepôt</div>
+      </div>
+      <div class="tile-check">✓</div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2 -->
+  <div id="step2-header" class="step-header hidden">
+    <div class="step-num">2</div>
+    <span class="step-title">Informations</span>
+  </div>
+
+  <!-- Panel retour -->
+  <div id="panel-retour" class="detail-panel glass hidden">
+    <span class="panel-tag tag-retour">🔄 Retour marchandise</span>
+    <div class="form-row">
+      <div class="field">
+        <label class="field-label">Transporteur</label>
+        <div class="select-wrap">
+          <select id="transporteur">
+            <option value="">— Sélectionner —</option>
+            <option>Dispam</option>
+            <option>Bernard</option>
+            <option>Coquelle Peyro</option>
+            <option>Portugal</option>
+            <option>Hollande</option>
+            <option>Compans</option>
+            <option>DTS</option>
+            <option>Omnitrans</option>
+            <option>TFE</option>
+            <option>Ceva</option>
+            <option>Sagil</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Date du retour</label>
+        <input type="date" id="date-retour" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel doublon -->
+  <div id="panel-doublon" class="detail-panel glass hidden">
+    <span class="panel-tag tag-doublon">🔁 Doublon silo</span>
+    <div class="info-box">
+      <span class="info-icon">ℹ️</span>
+      <div>
+        <strong>Doublon silo identifié</strong>
+        Cette palette est un doublon dans le silo. Aucune information complémentaire requise.
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel attente -->
+  <div id="panel-attente" class="detail-panel glass hidden">
+    <span class="panel-tag tag-attente">⏳ En attente de réception</span>
+    <div class="info-box">
+      <span class="info-icon">⏳</span>
+      <div>
+        <strong>En attente de réception</strong>
+        Cette palette sera traitée lors de la prochaine réception. Aucune action immédiate requise.
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel UM -->
+  <div id="panel-um" class="detail-panel glass hidden">
+    <span class="panel-tag tag-um">🔍 UM non trouvé</span>
+    <div class="info-box">
+      <span class="info-icon">⚠️</span>
+      <div>
+        <strong>UM non trouvé dans l'entrepôt</strong>
+        Merci de signaler ce cas au responsable logistique. Un suivi est nécessaire.
+      </div>
+    </div>
+  </div>
+
+  <!-- GÉNÉRER -->
+  <button id="btn-gen" class="btn-generate hidden" onclick="generate()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/>
+    </svg>
+    Générer l'étiquette
+  </button>
+
+  <!-- RÉSULTAT -->
+  <div id="result-card" class="result-card glass-strong hidden">
+    <div class="result-inner">
+      <div class="result-header-row">
+        <div>
+          <div id="result-type-label" class="result-type-label"></div>
+          <div id="result-ref" class="result-ref"></div>
+        </div>
+        <div id="result-type-icon" class="result-type-icon glass"></div>
+      </div>
+      <div class="result-divider"></div>
+      <div id="result-fields" class="result-fields"></div>
+      <div class="result-actions">
+        <button class="btn-action btn-pdf" onclick="exportPDF()">
+          <svg viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+          </svg>
+          Exporter PDF
+        </button>
+        <button class="btn-action btn-print-paper" onclick="window.print()">
+          <svg viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="6,9 6,2 18,2 18,9"/>
+            <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          Imprimer
+        </button>
+        <button class="btn-action btn-new" onclick="reset()">
+          <svg viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="1,4 1,10 7,10"/>
+            <path d="M3.51 15a9 9 0 1 0 .49-4.54"/>
+          </svg>
+          Nouvelle
+        </button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const TYPES = {
+    retour:  { label:'Retour marchandise',        icon:'🔄', color:[255,107,53],  hex:'#ff6b35', grad:'linear-gradient(135deg,#ff6b35,#ef4444)' },
+    doublon: { label:'Doublon silo',              icon:'🔁', color:[168,85,247],  hex:'#a855f7', grad:'linear-gradient(135deg,#a855f7,#6366f1)' },
+    attente: { label:'En attente de réception',   icon:'⏳', color:[245,158,11],  hex:'#f59e0b', grad:'linear-gradient(135deg,#f59e0b,#ea580c)' },
+    um:      { label:'UM non trouvé en entrepôt', icon:'🔍', color:[239,68,68],   hex:'#ef4444', grad:'linear-gradient(135deg,#ef4444,#be123c)' },
+  };
+
+  let currentType = null;
+
+  function initDate() {
+    const now = new Date();
+    const d = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    document.getElementById('top-date').textContent = d.charAt(0).toUpperCase() + d.slice(1);
+  }
+  initDate();
+
+  function selectType(type) {
+    currentType = type;
+    document.querySelectorAll('.option-tile').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.option-tile[data-type="${type}"]`).classList.add('active');
+
+    ['retour','doublon','attente','um'].forEach(t =>
+      document.getElementById(`panel-${t}`).classList.add('hidden')
+    );
+    document.getElementById(`panel-${type}`).classList.remove('hidden');
+    document.getElementById('step2-header').classList.remove('hidden');
+    document.getElementById('btn-gen').classList.remove('hidden');
+    document.getElementById('result-card').classList.add('hidden');
+
+    if (type === 'retour') {
+      const d = document.getElementById('date-retour');
+      if (!d.value) d.value = new Date().toISOString().split('T')[0];
+    }
+  }
+
+  function generate() {
+    const t = currentType;
+    if (!t) return;
+    const cfg = TYPES[t];
+    const now = new Date();
+    let fields = [];
+
+    if (t === 'retour') {
+      const tr   = document.getElementById('transporteur').value;
+      const date = document.getElementById('date-retour').value;
+      if (!tr)   { alert('Veuillez sélectionner un transporteur.'); return; }
+      if (!date) { alert('Veuillez sélectionner une date.'); return; }
+      fields = [
+        { key:'Transporteur',    val: tr },
+        { key:'Date du retour',  val: formatDate(date) },
+        { key:'Heure d\'édition', val: now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) },
+      ];
+    } else {
+      fields = [
+        { key:'Enregistré le', val: now.toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) },
+        { key:'Heure',         val: now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) },
+      ];
+    }
+
+    const id = 'PAL-' + now.getFullYear().toString().slice(-2)
+      + String(now.getMonth()+1).padStart(2,'0')
+      + String(now.getDate()).padStart(2,'0')
+      + '-' + String(Math.floor(Math.random()*9000)+1000);
+
+    const card = document.getElementById('result-card');
+    card.style.background = `linear-gradient(135deg, rgba(${cfg.color.join(',')}, .12), rgba(${cfg.color.join(',')}, .06)), rgba(255,255,255,.09)`;
+    card.style.borderColor = `rgba(${cfg.color.join(',')}, .35)`;
+
+    const iconEl = document.getElementById('result-type-icon');
+    iconEl.textContent    = cfg.icon;
+    iconEl.style.background = `rgba(${cfg.color.join(',')}, .2)`;
+
+    document.getElementById('result-type-label').textContent = cfg.label;
+    document.getElementById('result-ref').textContent        = id;
+
+    document.getElementById('result-fields').innerHTML = fields.map(f => `
+      <div class="result-field">
+        <div class="result-field-key">${f.key}</div>
+        <div class="result-field-val">${f.val}</div>
+      </div>
+    `).join('');
+
+    card.classList.remove('hidden');
+    card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  function formatDate(iso) {
+    const [y,m,d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    const t   = currentType;
+    const cfg = TYPES[t];
+    const col = cfg.color;
+    const now = new Date();
+    const W   = 210, mX = 20, pageH = 297;
+    const genDate = now.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
+    const genTime = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    const refId   = document.getElementById('result-ref').textContent;
+
+    // Background band
+    doc.setFillColor(13, 27, 62);
+    doc.rect(0, 0, W, pageH, 'F');
+
+    // Colour accent bar
+    doc.setFillColor(...col);
+    doc.rect(0, 0, 5, pageH, 'F');
+
+    // Top bar
+    doc.setFillColor(255, 255, 255, .05);
+    doc.rect(0, 0, W, 38, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(17);
+    doc.setTextColor(255, 255, 255);
+    doc.text('IDENTIFICATION PALETTE', mX, 17);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(138, 151, 180);
+    doc.text('Système d\'étiquetage entrepôt', mX, 27);
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`Réf. ${refId}`, W - mX, 13, { align:'right' });
+    doc.setTextColor(138, 151, 180);
+    doc.text(`${genDate} à ${genTime}`, W - mX, 23, { align:'right' });
+
+    // Type badge
+    let y = 52;
+    doc.setFillColor(...col, .2);
+    doc.roundedRect(mX, y - 7, W - mX*2, 16, 4, 4, 'F');
+    doc.setDrawColor(...col);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(mX, y - 7, W - mX*2, 16, 4, 4, 'D');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...col);
+    doc.text(cfg.label.toUpperCase(), mX + 8, y + 3.5);
+    y += 24;
+
+    // Fields
+    const rows = [];
+    if (t === 'retour') {
+      const tr   = document.getElementById('transporteur').value;
+      const date = document.getElementById('date-retour').value;
+      rows.push({ key:'Transporteur',    val: tr });
+      rows.push({ key:'Date du retour',  val: formatDate(date) });
+      rows.push({ key:'Heure d\'édition', val: genTime });
+    } else {
+      rows.push({ key:'Date', val: now.toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) });
+      rows.push({ key:'Heure', val: genTime });
+    }
+
+    rows.forEach((r, i) => {
+      const ry = y + i * 22;
+      doc.setFillColor(255, 255, 255, i % 2 === 0 ? .04 : .02);
+      doc.rect(mX, ry - 6, W - mX*2, 18, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(138, 151, 180);
+      doc.text(r.key.toUpperCase(), mX + 5, ry + 4);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(255, 255, 255);
+      doc.text(r.val, W - mX - 5, ry + 4, { align:'right' });
+    });
+
+    y += rows.length * 22 + 18;
+
+    // Comment zone
+    doc.setDrawColor(255, 255, 255, .12);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(mX, y, W - mX*2, 44, 3, 3, 'D');
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text('Commentaire / observations :', mX + 5, y + 10);
+
+    // Footer
+    doc.setFillColor(255, 255, 255, .04);
+    doc.rect(0, pageH - 18, W, 18, 'F');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(100, 116, 139);
+    doc.text('Identification Palettes — Système d\'étiquetage entrepôt', W / 2, pageH - 7, { align:'center' });
+
+    doc.save(`palette-${t}-${now.toISOString().slice(0,10)}.pdf`);
+  }
+
+  function reset() {
+    currentType = null;
+    document.querySelectorAll('.option-tile').forEach(t => t.classList.remove('active'));
+    ['retour','doublon','attente','um'].forEach(t =>
+      document.getElementById(`panel-${t}`).classList.add('hidden')
+    );
+    document.getElementById('step2-header').classList.add('hidden');
+    document.getElementById('btn-gen').classList.add('hidden');
+    document.getElementById('result-card').classList.add('hidden');
+    document.getElementById('transporteur').value = '';
+    document.getElementById('date-retour').value  = '';
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+</script>
+
+</body>
+</html>
