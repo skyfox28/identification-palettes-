@@ -14,6 +14,7 @@
       --c-doublon: #a855f7;
       --c-attente: #f59e0b;
       --c-um:      #ef4444;
+      --c-bloquee: #dc2626;
       --c-blue:    #3b82f6;
       --radius:    16px;
       --radius-sm: 10px;
@@ -228,6 +229,7 @@
     .option-tile[data-type="doublon"] { --tc: var(--c-doublon); --tca: rgba(168,85,247,.22); --tcs: rgba(168,85,247,.6); }
     .option-tile[data-type="attente"] { --tc: var(--c-attente); --tca: rgba(245,158,11,.22); --tcs: rgba(245,158,11,.6); }
     .option-tile[data-type="um"]      { --tc: var(--c-um);      --tca: rgba(239,68,68,.22);  --tcs: rgba(239,68,68,.6);  }
+    .option-tile[data-type="bloquee"] { --tc: var(--c-bloquee); --tca: rgba(220,38,38,.22);  --tcs: rgba(220,38,38,.6);  }
 
     .option-tile {
       background: rgba(255,255,255,.07);
@@ -966,6 +968,13 @@
       </div>
       <div class="tile-check">✓</div>
     </div>
+    <div class="option-tile" data-type="bloquee" onclick="selectType('bloquee')">
+      <div class="tile-icon">🔒</div>
+      <div class="tile-text">
+        <div class="tile-label">Palette<br>bloquée</div>
+      </div>
+      <div class="tile-check">✓</div>
+    </div>
   </div>
 
   <!-- ÉTAPE 2 -->
@@ -1080,6 +1089,29 @@
     </div>
   </div>
 
+  <!-- Panel bloquée -->
+  <div id="panel-bloquee" class="detail-panel glass hidden">
+    <div class="panel-tabs">
+      <button class="panel-tab active" onclick="switchTab('bloquee','info',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+        Informations
+      </button>
+      <button class="panel-tab" onclick="switchTab('bloquee','comment',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Commentaire
+      </button>
+    </div>
+    <div id="tab-bloquee-info" class="tab-pane">
+      <div class="info-box">
+        <span class="info-icon">🔒</span>
+        <div><strong>Palette bloquée</strong>Cette palette est bloquée et ne doit pas être déplacée ou traitée sans autorisation du responsable.</div>
+      </div>
+    </div>
+    <div id="tab-bloquee-comment" class="tab-pane hidden">
+      <textarea id="comment-bloquee" class="comment-area" placeholder="Motif du blocage, référence, contact…"></textarea>
+    </div>
+  </div>
+
   <!-- GÉNÉRER -->
   <button id="btn-gen" class="btn-generate hidden" onclick="generate()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -1160,6 +1192,7 @@
     doublon: { label:'Doublon silo',              icon:'🔁', color:[168,85,247],  hex:'#a855f7', grad:'linear-gradient(135deg,#a855f7,#6366f1)' },
     attente: { label:'En attente de réception',   icon:'⏳', color:[245,158,11],  hex:'#f59e0b', grad:'linear-gradient(135deg,#f59e0b,#ea580c)' },
     um:      { label:'UM non trouvé en entrepôt', icon:'🔍', color:[239,68,68],   hex:'#ef4444', grad:'linear-gradient(135deg,#ef4444,#be123c)' },
+    bloquee: { label:'Palette bloquée',           icon:'🔒', color:[220,38,38],   hex:'#dc2626', grad:'linear-gradient(135deg,#dc2626,#7f1d1d)' },
   };
 
   let currentType = null;
@@ -1183,7 +1216,7 @@
     document.querySelectorAll('.option-tile').forEach(t => t.classList.remove('active'));
     document.querySelector(`.option-tile[data-type="${type}"]`).classList.add('active');
 
-    ['retour','doublon','attente','um'].forEach(t =>
+    ['retour','doublon','attente','um','bloquee'].forEach(t =>
       document.getElementById(`panel-${t}`).classList.add('hidden')
     );
     document.getElementById(`panel-${type}`).classList.remove('hidden');
@@ -1279,6 +1312,19 @@
           <circle cx="46" cy="59" r="2.5" fill="currentColor"/>
         </svg>`,
       },
+      bloquee: {
+        badge: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0110 0v4"/>
+          <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+        </svg>`,
+        watermark: `<svg viewBox="0 0 100 110" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="8" y="48" width="84" height="56" rx="8"/>
+          <path d="M26 48V34a24 24 0 0148 0v14"/>
+          <circle cx="50" cy="76" r="8" fill="currentColor" opacity=".6"/>
+          <line x1="50" y1="84" x2="50" y2="94"/>
+        </svg>`,
+      },
     };
 
     /* ── header ── */
@@ -1343,132 +1389,296 @@
 
   function exportPDF() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-    const t   = currentType;
-    const cfg = TYPES[t];
-    const col = cfg.color;
-    const now = new Date();
-    const W   = 210, mX = 20, pageH = 297;
+    const doc  = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    const t    = currentType;
+    const cfg  = TYPES[t];
+    const col  = cfg.color;           // [r,g,b]
+    const colD = col.map(c => Math.max(0, c - 80));  // couleur foncée pour gradient
+    const now  = new Date();
+    const W    = 210, pageH = 297;
+    const cX   = 15, cW = W - 30;    // carte x=15, largeur=180
+    const cY   = 16;
+    const hH   = 52;                  // hauteur bandeau header
     const genDate = now.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
     const genTime = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
-    const refId   = document.getElementById('tag-footer-date').textContent;
 
-    // Background band
-    doc.setFillColor(13, 27, 62);
+    // ── FOND PAGE
+    doc.setFillColor(13, 20, 50);
     doc.rect(0, 0, W, pageH, 'F');
 
-    // Colour accent bar
-    doc.setFillColor(...col);
-    doc.rect(0, 0, 5, pageH, 'F');
+    // Texture diagonale sur la page (lignes très légères)
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.15);
+    for (let i = -pageH; i < W + pageH; i += 9) {
+      const x1 = Math.max(0, i), y1 = i < 0 ? -i : 0;
+      const x2 = Math.min(W, i + pageH), y2 = i < 0 ? pageH : pageH - i;
+      if (x1 < W && y1 < pageH) doc.line(x1, y1, x2, Math.min(pageH, y2));
+    }
 
-    // Top bar
-    doc.setFillColor(255, 255, 255, .05);
-    doc.rect(0, 0, W, 38, 'F');
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(17);
-    doc.setTextColor(255, 255, 255);
-    doc.text('IDENTIFICATION PALETTE', mX, 17);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
-    doc.setTextColor(138, 151, 180);
-    doc.text('Système d\'étiquetage entrepôt', mX, 27);
-    doc.setFontSize(8);
-    doc.setTextColor(138, 151, 180);
-    doc.text(`${genDate} à ${genTime}`, W - mX, 18, { align:'right' });
-
-    // Type badge
-    let y = 52;
-    doc.setFillColor(...col, .2);
-    doc.roundedRect(mX, y - 7, W - mX*2, 16, 4, 4, 'F');
+    // ── CARTE — fond légèrement plus clair
+    const cardH = computeCardH(t, doc, cW);
+    doc.setFillColor(22, 34, 72);
+    doc.roundedRect(cX, cY, cW, cardH, 5, 5, 'F');
+    // Bordure colorée
     doc.setDrawColor(...col);
-    doc.setLineWidth(0.4);
-    doc.roundedRect(mX, y - 7, W - mX*2, 16, 4, 4, 'D');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(...col);
-    doc.text(cfg.label.toUpperCase(), mX + 8, y + 3.5);
-    y += 24;
+    doc.setLineWidth(0.7);
+    doc.roundedRect(cX, cY, cW, cardH, 5, 5, 'D');
 
-    // Fields
+    // ── BANDEAU HEADER (couleur pleine + overlay foncé bas)
+    doc.setFillColor(...col);
+    doc.roundedRect(cX, cY, cW, hH, 5, 5, 'F');
+    // Carré pour fermer les coins arrondis du bas du header
+    doc.rect(cX, cY + hH - 8, cW, 8, 'F');
+    // Overlay sombre en bas du bandeau
+    doc.setFillColor(0, 0, 0);
+    doc.saveGraphicsState?.();
+    for (let oy = 0; oy < 14; oy++) {
+      doc.setFillColor(0, 0, 0);
+      doc.setGState?.(doc.GState?.({ opacity: oy / 70 }));
+      doc.rect(cX, cY + hH - 14 + oy, cW, 1, 'F');
+    }
+    // Hachures diagonales sur bandeau
+    doc.setDrawColor(...col.map(c => Math.min(255, c + 60)));
+    doc.setLineWidth(0.2);
+    for (let i = -hH; i < cW + hH; i += 10) {
+      const lx1 = cX + Math.max(0, i), ly1 = cY + (i < 0 ? -i : 0);
+      const lx2 = cX + Math.min(cW, i + hH), ly2 = cY + (i < 0 ? hH : hH - i);
+      if (lx1 < cX + cW && ly1 < cY + hH) doc.line(lx1, ly1, lx2, Math.min(cY + hH, ly2));
+    }
+
+    // Trou de suspension (centré haut)
+    const holeX = cX + cW / 2, holeY = cY + 7;
+    doc.setFillColor(0, 0, 0);
+    doc.circle(holeX, holeY, 3.5, 'F');
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.5);
+    doc.circle(holeX, holeY, 3.5, 'D');
+
+    // Badge logo (rectangle arrondi verre)
+    const bX = cX + 10, bY = cY + 14, bS = 24;
+    doc.setFillColor(255, 255, 255);
+    doc.setGState?.(doc.GState?.({ opacity: 0.15 }));
+    doc.roundedRect(bX, bY, bS, bS, 3, 3, 'F');
+    doc.setGState?.(doc.GState?.({ opacity: 1 }));
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(bX, bY, bS, bS, 3, 3, 'D');
+    // Dessin logo simplifié
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(1.2);
+    drawPDFLogo(doc, t, bX + bS/2, bY + bS/2, bS * 0.52);
+
+    // Nom du type
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(255, 255, 255);
+    const typeLines = doc.splitTextToSize(cfg.label, cW - bS - 30);
+    doc.text(typeLines, bX + bS + 7, cY + 26);
+
+    // Sous-titre
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(255, 255, 255);
+    doc.text('IDENTIFICATION PALETTE · ENTREPÔT', bX + bS + 7, cY + hH - 9);
+
+    // Date en haut à droite du bandeau
+    doc.setFontSize(7);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`${genDate}  ${genTime}`, cX + cW - 6, cY + 12, { align:'right' });
+
+    // ── PERFORATION
+    let y = cY + hH + 6;
+    doc.setFillColor(13, 20, 50);
+    doc.circle(cX, y, 5, 'F');       // demi-cercle gauche (recouvre la bordure)
+    doc.circle(cX + cW, y, 5, 'F'); // demi-cercle droit
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.3);
+    // Tirets manuels
+    for (let dx = cX + 7; dx < cX + cW - 7; dx += 5) {
+      doc.line(dx, y, Math.min(dx + 3, cX + cW - 7), y);
+    }
+    y += 10;
+
+    // ── CHAMPS INFO
     const rows = [];
     if (t === 'retour') {
       const tr   = document.getElementById('transporteur').value;
       const date = document.getElementById('date-retour').value;
       rows.push({ key:'Transporteur',    val: tr });
       rows.push({ key:'Date du retour',  val: formatDate(date) });
-      rows.push({ key:'Heure d\'édition', val: genTime });
+      rows.push({ key:'Heure',           val: genTime });
     } else {
-      rows.push({ key:'Date', val: now.toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) });
-      rows.push({ key:'Heure', val: genTime });
+      rows.push({ key:'Enregistré le', val: now.toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) });
+      rows.push({ key:'Heure',         val: genTime });
     }
 
+    const rowH = 20;
     rows.forEach((r, i) => {
-      const ry = y + i * 22;
-      doc.setFillColor(255, 255, 255, i % 2 === 0 ? .04 : .02);
-      doc.rect(mX, ry - 6, W - mX*2, 18, 'F');
+      const ry = y + i * rowH;
+      // fond ligne alterné
+      doc.setFillColor(255, 255, 255);
+      doc.setLineWidth(0);
+      // hack opacity avec gradient de rectangles
+      doc.setFillColor(i % 2 === 0 ? 30 : 24, i % 2 === 0 ? 46 : 38, i % 2 === 0 ? 90 : 78);
+      doc.rect(cX + 4, ry, cW - 8, rowH - 2, 'F');
+      // Bordure fine
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.2);
+      doc.rect(cX + 4, ry, cW - 8, rowH - 2, 'D');
+      // Label
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
+      doc.setFontSize(6.5);
       doc.setTextColor(138, 151, 180);
-      doc.text(r.key.toUpperCase(), mX + 5, ry + 4);
+      doc.text(r.key.toUpperCase(), cX + 9, ry + 7);
+      // Valeur
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
-      doc.setTextColor(255, 255, 255);
-      doc.text(r.val, W - mX - 5, ry + 4, { align:'right' });
+      doc.setTextColor(240, 245, 255);
+      doc.text(r.val, cX + cW - 9, ry + 14, { align:'right' });
     });
+    y += rows.length * rowH + 6;
 
-    y += rows.length * 22 + 18;
-
-    // Comment zone
+    // ── COMMENTAIRE
     const pdfComment = (document.getElementById(`comment-${t}`)?.value ?? '').trim();
     if (pdfComment) {
-      doc.setFillColor(255, 255, 255, .04);
-      doc.roundedRect(mX, y, W - mX*2, 10, 2, 2, 'F');
-      doc.setDrawColor(255, 255, 255, .12);
-      doc.setLineWidth(0.4);
-      doc.roundedRect(mX, y, W - mX*2, 10, 2, 2, 'D');
+      // Label section commentaire
+      doc.setFillColor(30, 46, 90);
+      doc.rect(cX + 4, y, cW - 8, 9, 'F');
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.2);
+      doc.rect(cX + 4, y, cW - 8, 9, 'D');
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
+      doc.setFontSize(6.5);
       doc.setTextColor(138, 151, 180);
-      doc.text('COMMENTAIRE', mX + 5, y + 6.5);
-      y += 14;
-      const lines = doc.splitTextToSize(pdfComment, W - mX*2 - 10);
-      const commentH = lines.length * 6 + 12;
-      doc.setFillColor(255, 255, 255, .03);
-      doc.roundedRect(mX, y, W - mX*2, commentH, 2, 2, 'F');
-      doc.setDrawColor(255, 255, 255, .1);
-      doc.roundedRect(mX, y, W - mX*2, commentH, 2, 2, 'D');
+      doc.text('COMMENTAIRE', cX + 9, y + 6);
+      y += 11;
+      // Contenu commentaire
+      const lines = doc.splitTextToSize(pdfComment, cW - 22);
+      const cH = lines.length * 5.5 + 10;
+      doc.setFillColor(24, 38, 78);
+      doc.rect(cX + 4, y, cW - 8, cH, 'F');
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.2);
+      doc.rect(cX + 4, y, cW - 8, cH, 'D');
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
-      doc.setTextColor(220, 225, 235);
-      doc.text(lines, mX + 5, y + 8);
-      y += commentH + 14;
+      doc.setTextColor(210, 220, 240);
+      doc.text(lines, cX + 9, y + 8);
+      y += cH + 6;
     } else {
-      doc.setDrawColor(255, 255, 255, .12);
-      doc.setLineWidth(0.4);
-      doc.roundedRect(mX, y, W - mX*2, 36, 3, 3, 'D');
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(8);
-      doc.setTextColor(100, 116, 139);
-      doc.text('Commentaire / observations :', mX + 5, y + 10);
-      y += 50;
+      // Zone vide à remplir à la main
+      doc.setFillColor(20, 32, 70);
+      doc.rect(cX + 4, y, cW - 8, 28, 'F');
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.2);
+      doc.rect(cX + 4, y, cW - 8, 28, 'D');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(80, 100, 140);
+      doc.text('COMMENTAIRE', cX + 9, y + 7);
+      // Lignes de guidage
+      doc.setDrawColor(60, 80, 120);
+      doc.setLineWidth(0.2);
+      [15, 21].forEach(dy => doc.line(cX + 9, y + dy, cX + cW - 12, y + dy));
+      y += 34;
     }
 
-    // Footer
-    doc.setFillColor(255, 255, 255, .04);
-    doc.rect(0, pageH - 18, W, 18, 'F');
+    // ── PIED DE CARTE
+    y += 4;
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.2);
+    doc.line(cX + 4, y, cX + cW - 4, y);
+    // Date
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    doc.setTextColor(100, 116, 139);
-    doc.text('Identification Palettes — Système d\'étiquetage entrepôt', W / 2, pageH - 7, { align:'center' });
+    doc.setFontSize(7);
+    doc.setTextColor(80, 100, 140);
+    doc.text(`Édité le ${genDate} à ${genTime}`, cX + 9, y + 6);
+    // Barcode décoratif
+    const bcH = [10,7,9,5,11,8,6,10,11,5,8,9,7,11,6,9,10,5,11,8];
+    let bxc = cX + cW - 9;
+    bcH.forEach(bh => {
+      doc.setFillColor(80, 100, 140);
+      doc.rect(bxc, y + 10 - bh, 1.5, bh, 'F');
+      bxc -= 2.5;
+    });
+
+    // ── PIED DE PAGE
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(40, 55, 90);
+    doc.text('Identification Palettes — Système d\'étiquetage entrepôt', W / 2, pageH - 8, { align:'center' });
 
     doc.save(`palette-${t}-${now.toISOString().slice(0,10)}.pdf`);
+  }
+
+  /* Hauteur totale dynamique de la carte pour jsPDF */
+  function computeCardH(t, doc, cW) {
+    const hH   = 52, perfH = 16, footerH = 20;
+    const rowH = 20;
+    const nRows = t === 'retour' ? 3 : 2;
+    const comment = (document.getElementById(`comment-${t}`)?.value ?? '').trim();
+    let commentH = 0;
+    if (comment) {
+      const lines = doc.splitTextToSize(comment, cW - 22);
+      commentH = lines.length * 5.5 + 10 + 11 + 6;
+    } else {
+      commentH = 34 + 6;
+    }
+    return hH + perfH + nRows * rowH + 6 + commentH + footerH;
+  }
+
+  /* Logos géométriques jsPDF par type */
+  function drawPDFLogo(doc, type, cx, cy, r) {
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(1.0);
+    if (type === 'retour') {
+      // Camion simplifié
+      doc.rect(cx - r*.8, cy - r*.35, r*1.2, r*.7, 'D');
+      doc.rect(cx + r*.4, cy - r*.25, r*.5, r*.6, 'D');
+      doc.circle(cx - r*.45, cy + r*.35, r*.18, 'D');
+      doc.circle(cx + r*.6,  cy + r*.35, r*.18, 'D');
+      // flèche retour
+      doc.setLineWidth(0.7);
+      doc.line(cx - r*.6, cy - r*.6, cx + r*.3, cy - r*.6);
+      doc.line(cx - r*.6, cy - r*.6, cx - r*.35, cy - r*.85);
+      doc.line(cx - r*.6, cy - r*.6, cx - r*.35, cy - r*.35);
+    } else if (type === 'doublon') {
+      // Deux carrés superposés
+      doc.rect(cx - r*.7, cy - r*.2, r*.9, r*.9, 'D');
+      doc.rect(cx - r*.2, cy - r*.7, r*.9, r*.9, 'D');
+    } else if (type === 'attente') {
+      // Horloge
+      doc.circle(cx, cy, r*.75, 'D');
+      doc.line(cx, cy, cx, cy - r*.5);
+      doc.line(cx, cy, cx + r*.35, cy + r*.2);
+    } else if (type === 'um') {
+      // Loupe
+      doc.circle(cx - r*.15, cy - r*.1, r*.55, 'D');
+      doc.line(cx + r*.28, cy + r*.35, cx + r*.7, cy + r*.75);
+      doc.setLineWidth(0.6);
+      doc.line(cx - r*.15, cy - r*.45, cx - r*.15, cy - r*.1);
+      doc.circle(cx - r*.15, cy + r*.12, r*.07, 'F');
+    } else if (type === 'bloquee') {
+      // Cadenas
+      const lW = r*.7, lH = r*.6, lX = cx - lW/2, lY = cy - r*.1;
+      doc.roundedRect(lX, lY, lW, lH, 1.5, 1.5, 'D');
+      // Anse
+      doc.setLineWidth(0.9);
+      doc.line(lX + lW*.25, lY, lX + lW*.25, cy - r*.5);
+      doc.line(lX + lW*.75, lY, lX + lW*.75, cy - r*.5);
+      doc.line(lX + lW*.25, cy - r*.5, lX + lW*.75, cy - r*.5);
+      // Trou de serrure
+      doc.setLineWidth(0.5);
+      doc.circle(cx, lY + lH*.42, r*.1, 'F');
+      doc.line(cx, lY + lH*.42, cx, lY + lH*.72);
+    }
   }
 
   function reset() {
     currentType = null;
     document.querySelectorAll('.option-tile').forEach(t => t.classList.remove('active'));
-    ['retour','doublon','attente','um'].forEach(t =>
+    ['retour','doublon','attente','um','bloquee'].forEach(t =>
       document.getElementById(`panel-${t}`).classList.add('hidden')
     );
     document.getElementById('step2-header').classList.add('hidden');
@@ -1477,7 +1687,7 @@
     document.getElementById('transporteur').value = '';
     document.getElementById('date-retour').value  = '';
     /* vider les commentaires + remettre onglet Info actif */
-    ['retour','doublon','attente','um'].forEach(type => {
+    ['retour','doublon','attente','um','bloquee'].forEach(type => {
       const ta = document.getElementById(`comment-${type}`);
       if (ta) ta.value = '';
       const tabs = document.querySelectorAll(`#panel-${type} .panel-tab`);
