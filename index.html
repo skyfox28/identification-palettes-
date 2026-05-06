@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identification Palettes</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --blue-dark:  #1a2f4e;
+      --blue-mid:   #2563eb;
+      --blue-light: #dbeafe;
+      --accent:     #f59e0b;
+      --green:      #16a34a;
+      --red:        #dc2626;
+      --orange:     #ea580c;
+      --purple:     #7c3aed;
+      --bg:         #f0f4f8;
+      --card:       #ffffff;
+      --text:       #1e293b;
+      --muted:      #64748b;
+      --border:     #e2e8f0;
+      --radius:     14px;
+      --shadow:     0 4px 24px rgba(30,41,59,.10);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, var(--blue-dark) 0%, #243e63 100%);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.25);
+    }
+    .header-icon {
+      width: 52px; height: 52px;
+      background: var(--accent);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+    }
+    .header-text h1 {
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+    .header-text p {
+      color: #94a3b8;
+      font-size: .85rem;
+      margin-top: 2px;
+    }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      max-width: 680px;
+      width: 100%;
+      margin: 32px auto;
+      padding: 0 16px 40px;
+    }
+
+    /* ── STEP LABEL ── */
+    .step-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    /* ── SELECT CARD ── */
+    .select-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .select-card label {
+      display: block;
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    /* ── DROPDOWN TILES (grid of big buttons) ── */
+    .option-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .option-tile {
+      cursor: pointer;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      transition: all .18s ease;
+      background: #fff;
+      user-select: none;
+    }
+    .option-tile:hover {
+      border-color: var(--blue-mid);
+      background: #eff6ff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(37,99,235,.12);
+    }
+    .option-tile.active {
+      border-color: var(--blue-mid);
+      background: var(--blue-light);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+    }
+    .option-tile .tile-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+    .option-tile .tile-label {
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    /* Override active colour per type */
+    .option-tile[data-type="retour"].active       { border-color: var(--orange); background: #fff7ed; box-shadow: 0 0 0 3px rgba(234,88,12,.15); }
+    .option-tile[data-type="doublon"].active      { border-color: var(--purple); background: #f5f3ff; box-shadow: 0 0 0 3px rgba(124,58,237,.15); }
+    .option-tile[data-type="attente"].active      { border-color: var(--accent);  background: #fffbeb; box-shadow: 0 0 0 3px rgba(245,158,11,.15); }
+    .option-tile[data-type="um"].active           { border-color: var(--red);     background: #fef2f2; box-shadow: 0 0 0 3px rgba(220,38,38,.15); }
+
+    /* ── DETAIL PANEL ── */
+    .detail-panel {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 24px;
+      animation: slideDown .22s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .panel-title .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+    .badge-orange { background: #fff7ed; color: var(--orange); border: 1.5px solid #fed7aa; }
+    .badge-purple { background: #f5f3ff; color: var(--purple); border: 1.5px solid #ddd6fe; }
+    .badge-yellow { background: #fffbeb; color: #b45309;       border: 1.5px solid #fde68a; }
+    .badge-red    { background: #fef2f2; color: var(--red);    border: 1.5px solid #fecaca; }
+
+    /* ── FORM FIELDS ── */
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .field select,
+    .field input[type="date"],
+    .field input[type="text"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+      color: var(--text);
+      background: #fff;
+      appearance: none;
+      transition: border-color .15s;
+      outline: none;
+    }
+    .field select:focus,
+    .field input:focus {
+      border-color: var(--blue-mid);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+    .select-wrapper {
+      position: relative;
+    }
+    .select-wrapper::after {
+      content: '▾';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+      font-size: 1rem;
+    }
+
+    /* ── SIMPLE INFO PANEL (no form) ── */
+    .info-panel {
+      border-radius: 10px;
+      padding: 18px 20px;
+      font-size: .95rem;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+    .info-panel-purple { background: #f5f3ff; border: 1.5px solid #ddd6fe; color: #4c1d95; }
+    .info-panel-yellow { background: #fffbeb; border: 1.5px solid #fde68a; color: #78350f; }
+    .info-panel-red    { background: #fef2f2; border: 1.5px solid #fecaca; color: #7f1d1d; }
+
+    /* ── GENERATE BUTTON ── */
+    .btn-generate {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--blue-mid), #1d4ed8);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .4px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(37,99,235,.35);
+      transition: all .18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn-generate:hover {
+      background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(37,99,235,.4);
+    }
+    .btn-generate:active { transform: translateY(0); }
+
+    /* ── ÉTIQUETTE / RESULT ── */
+    .result-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 24px;
+      animation: slideDown .25s ease;
+    }
+    .result-header {
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .result-header span {
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.85);
+    }
+    .result-header .result-icon { font-size: 1.4rem; }
+    .result-body {
+      padding: 24px 22px;
+    }
+    .result-type {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .result-rows { display: flex; flex-direction: column; gap: 10px; }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: .9rem;
+    }
+    .result-row .rkey {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .result-row .rval {
+      font-weight: 700;
+      color: var(--text);
+    }
+    .btn-print {
+      margin-top: 20px;
+      width: 100%;
+      padding: 13px;
+      background: #f8fafc;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all .15s;
+      color: var(--text);
+    }
+    .btn-print:hover { background: var(--blue-light); border-color: var(--blue-mid); color: var(--blue-mid); }
+    .btn-print-paper:hover { background: #f0fdf4; border-color: var(--green); color: var(--green); }
+    .action-row { display: flex; gap: 10px; margin-top: 20px; }
+    .action-row .btn-print { margin-top: 0; flex: 1; }
+
+    .btn-reset {
+      margin-top: 10px;
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .btn-reset:hover { border-color: #94a3b8; color: var(--text); }
+
+    /* ── PRINT ── */
+    @media print {
+      header, .select-card, .detail-panel, .btn-generate, .action-row, .btn-reset { display: none !important; }
+      .result-card { box-shadow: none; border: 2px solid #000; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      .option-grid { grid-template-columns: 1fr; }
+      header { padding: 16px 20px; }
+      main { margin: 20px auto; }
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">📦</div>
+  <div class="header-text">
+    <h1>Identification Palettes</h1>
+    <p>Système d'étiquetage entrepôt</p>
+  </div>
+</header>
+
+<main>
+
+  <!-- ÉTAPE 1 — choix du type -->
+  <div class="select-card">
+    <p class="step-label">Étape 1 — Type d'identification</p>
+    <label>Sélectionnez une catégorie</label>
+    <div class="option-grid">
+
+      <div class="option-tile" data-type="retour" onclick="selectType('retour')">
+        <span class="tile-icon">🔄</span>
+        <span class="tile-label">Retour marchandise</span>
+      </div>
+
+      <div class="option-tile" data-type="doublon" onclick="selectType('doublon')">
+        <span class="tile-icon">🔁</span>
+        <span class="tile-label">Doublon silo</span>
+      </div>
+
+      <div class="option-tile" data-type="attente" onclick="selectType('attente')">
+        <span class="tile-icon">⏳</span>
+        <span class="tile-label">En attente de réception</span>
+      </div>
+
+      <div class="option-tile" data-type="um" onclick="selectType('um')">
+        <span class="tile-icon">🔍</span>
+        <span class="tile-label">UM non trouvé dans l'entrepôt</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2 — détail selon le type -->
+  <div id="panel-retour" class="detail-panel hidden">
+    <div class="panel-title">
+      <span class="badge badge-orange">🔄 Retour marchandise</span>
+    </div>
+
+    <div class="field">
+      <label>Transporteur</label>
+      <div class="select-wrapper">
+        <select id="transporteur">
+          <option value="">— Sélectionner un transporteur —</option>
+          <option>Dispam</option>
+          <option>Bernard</option>
+          <option>Coquelle Peyro</option>
+          <option>Portugal</option>
+          <option>Hollande</option>
+          <option>Compans</option>
+          <option>DTS</option>
+          <option>Omnitrans</option>
+          <option>TFE</option>
+          <option>Ceva</option>
+          <option>Sagil</option>
+          <option>Autre</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="date-retour" />
+    </div>
+  </div>
+
+  <div id="panel-doublon" class="detail-panel hidden">
+    <div class="panel-title">
+      <span class="badge badge-purple">🔁 Doublon silo</span>
+    </div>
+    <div class="info-panel info-panel-purple">
+      Cette palette est identifiée comme <strong>doublon silo</strong>.<br>
+      Aucune information complémentaire requise.
+    </div>
+  </div>
+
+  <div id="panel-attente" class="detail-panel hidden">
+    <div class="panel-title">
+      <span class="badge badge-yellow">⏳ En attente de réception</span>
+    </div>
+    <div class="info-panel info-panel-yellow">
+      Cette palette est en <strong>attente de réception</strong>.<br>
+      Elle sera traitée lors de la prochaine réception.
+    </div>
+  </div>
+
+  <div id="panel-um" class="detail-panel hidden">
+    <div class="panel-title">
+      <span class="badge badge-red">🔍 UM non trouvé</span>
+    </div>
+    <div class="info-panel info-panel-red">
+      <strong>UM non trouvé dans l'entrepôt.</strong><br>
+      Merci de signaler ce cas au responsable logistique.
+    </div>
+  </div>
+
+  <!-- BOUTON GÉNÉRER -->
+  <button id="btn-gen" class="btn-generate hidden" onclick="generate()">
+    <span>🏷️</span> Générer l'étiquette
+  </button>
+
+  <!-- RÉSULTAT -->
+  <div id="result-card" class="result-card hidden">
+    <div id="result-header" class="result-header">
+      <span>Étiquette palette</span>
+      <span id="result-header-icon" class="result-icon"></span>
+    </div>
+    <div class="result-body">
+      <div id="result-type" class="result-type"></div>
+      <div id="result-rows" class="result-rows"></div>
+      <div class="action-row">
+        <button class="btn-print" onclick="exportPDF()">📄 Exporter PDF</button>
+        <button class="btn-print btn-print-paper" onclick="window.print()">🖨️ Imprimer</button>
+      </div>
+      <button class="btn-reset" onclick="reset()">↩ Nouvelle étiquette</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const TYPES = {
+    retour:  { label: 'Retour marchandise',            icon: '🔄', headerClass: 'bg-orange' },
+    doublon: { label: 'Doublon silo',                  icon: '🔁', headerClass: 'bg-purple' },
+    attente: { label: 'En attente de réception',       icon: '⏳', headerClass: 'bg-yellow' },
+    um:      { label: 'UM non trouvé en entrepôt',     icon: '🔍', headerClass: 'bg-red'    },
+  };
+
+  const HEADER_COLORS = {
+    retour:  'linear-gradient(135deg,#ea580c,#c2410c)',
+    doublon: 'linear-gradient(135deg,#7c3aed,#5b21b6)',
+    attente: 'linear-gradient(135deg,#f59e0b,#d97706)',
+    um:      'linear-gradient(135deg,#dc2626,#991b1b)',
+  };
+
+  let currentType = null;
+
+  function selectType(type) {
+    currentType = type;
+
+    // highlight tile
+    document.querySelectorAll('.option-tile').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.option-tile[data-type="${type}"]`).classList.add('active');
+
+    // show correct panel
+    ['retour','doublon','attente','um'].forEach(t => {
+      document.getElementById(`panel-${t}`).classList.add('hidden');
+    });
+    document.getElementById(`panel-${type}`).classList.remove('hidden');
+
+    // show generate button
+    document.getElementById('btn-gen').classList.remove('hidden');
+
+    // hide previous result
+    document.getElementById('result-card').classList.add('hidden');
+
+    // set today as default date for retour
+    if (type === 'retour') {
+      const d = document.getElementById('date-retour');
+      if (!d.value) d.value = new Date().toISOString().split('T')[0];
+    }
+  }
+
+  function generate() {
+    const t = currentType;
+    if (!t) return;
+
+    let rows = [];
+
+    if (t === 'retour') {
+      const transporteur = document.getElementById('transporteur').value;
+      const date         = document.getElementById('date-retour').value;
+      if (!transporteur) { alert('Veuillez sélectionner un transporteur.'); return; }
+      if (!date)         { alert('Veuillez sélectionner une date.'); return; }
+      rows = [
+        { key: 'Transporteur', val: transporteur },
+        { key: 'Date', val: formatDate(date) },
+        { key: 'Heure', val: new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) },
+      ];
+    } else {
+      rows = [
+        { key: 'Enregistré le', val: new Date().toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) },
+        { key: 'Heure',         val: new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) },
+      ];
+    }
+
+    // fill result
+    const cfg = TYPES[t];
+    document.getElementById('result-header').style.background = HEADER_COLORS[t];
+    document.getElementById('result-header-icon').textContent = cfg.icon;
+    document.getElementById('result-type').textContent = cfg.label;
+
+    const rowsEl = document.getElementById('result-rows');
+    rowsEl.innerHTML = rows.map(r =>
+      `<div class="result-row"><span class="rkey">${r.key}</span><span class="rval">${r.val}</span></div>`
+    ).join('');
+
+    document.getElementById('result-card').classList.remove('hidden');
+    document.getElementById('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function formatDate(iso) {
+    const [y,m,d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const t   = currentType;
+    const cfg = TYPES[t];
+
+    // ── couleurs par type
+    const colors = {
+      retour:  [234, 88,  12],
+      doublon: [124, 58, 237],
+      attente: [245,158, 11],
+      um:      [220, 38,  38],
+    };
+    const col = colors[t];
+
+    const W = 210, pageH = 297;
+    const marginX = 20;
+
+    // ── Bandeau d'en-tête
+    doc.setFillColor(...col);
+    doc.rect(0, 0, W, 40, 'F');
+
+    // Logo/icone placeholder
+    doc.setFillColor(255,255,255,0.2);
+    doc.roundedRect(marginX, 8, 24, 24, 4, 4, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(18);
+    doc.text(cfg.icon ?? '📦', marginX + 12, 24, { align: 'center' });
+
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica','bold');
+    doc.text('IDENTIFICATION PALETTE', marginX + 32, 18);
+    doc.setFontSize(11);
+    doc.setFont('helvetica','normal');
+    doc.text(cfg.label.toUpperCase(), marginX + 32, 28);
+
+    // ── Numéro & date génération (coin droit)
+    const now = new Date();
+    const genDate = now.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
+    const genTime = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    doc.setFontSize(9);
+    doc.setTextColor(255,255,255);
+    doc.text(`Édité le ${genDate} à ${genTime}`, W - marginX, 34, { align:'right' });
+
+    // ── Corps
+    let y = 60;
+
+    // Titre du type
+    doc.setFillColor(...col.map(c => Math.min(255, c + 200)));
+    doc.roundedRect(marginX, y - 8, W - marginX*2, 18, 3, 3, 'F');
+    doc.setTextColor(...col);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(14);
+    doc.text(cfg.label, marginX + 8, y + 4);
+    y += 26;
+
+    // Lignes de détail
+    const rows = [];
+    if (t === 'retour') {
+      const transporteur = document.getElementById('transporteur').value;
+      const date         = document.getElementById('date-retour').value;
+      rows.push({ key: 'Transporteur', val: transporteur });
+      rows.push({ key: 'Date du retour', val: formatDate(date) });
+      rows.push({ key: 'Heure d\'édition', val: genTime });
+    } else {
+      rows.push({ key: 'Date', val: now.toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) });
+      rows.push({ key: 'Heure', val: genTime });
+    }
+
+    rows.forEach((r, i) => {
+      const rowY = y + i * 18;
+      // fond alterné
+      if (i % 2 === 0) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(marginX, rowY - 6, W - marginX*2, 16, 'F');
+      }
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(9);
+      doc.setTextColor(100,116,139);
+      doc.text(r.key.toUpperCase(), marginX + 6, rowY + 4);
+
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(12);
+      doc.setTextColor(30,41,59);
+      doc.text(r.val, W - marginX - 6, rowY + 4, { align:'right' });
+    });
+
+    y += rows.length * 18 + 20;
+
+    // ── Zone de commentaire (optionnelle pour usage futur)
+    doc.setDrawColor(...col);
+    doc.setLineWidth(0.5);
+    doc.rect(marginX, y, W - marginX*2, 40);
+    doc.setFont('helvetica','italic');
+    doc.setFontSize(9);
+    doc.setTextColor(148,163,184);
+    doc.text('Commentaire / observations :', marginX + 4, y + 8);
+
+    y += 60;
+
+    // ── Pied de page avec ligne
+    doc.setDrawColor(226,232,240);
+    doc.setLineWidth(0.4);
+    doc.line(marginX, pageH - 20, W - marginX, pageH - 20);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8);
+    doc.setTextColor(148,163,184);
+    doc.text('Identification Palettes — Système d\'étiquetage entrepôt', W / 2, pageH - 13, { align:'center' });
+
+    // ── Téléchargement
+    const filename = `palette-${t}-${now.toISOString().slice(0,10)}.pdf`;
+    doc.save(filename);
+  }
+
+  function reset() {
+    currentType = null;
+    document.querySelectorAll('.option-tile').forEach(t => t.classList.remove('active'));
+    ['retour','doublon','attente','um'].forEach(t =>
+      document.getElementById(`panel-${t}`).classList.add('hidden')
+    );
+    document.getElementById('btn-gen').classList.add('hidden');
+    document.getElementById('result-card').classList.add('hidden');
+    document.getElementById('transporteur').value = '';
+    document.getElementById('date-retour').value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
