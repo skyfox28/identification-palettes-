@@ -690,25 +690,132 @@
     .btn-new:hover { background: rgba(255,255,255,.08); color: rgba(255,255,255,.75); }
 
     /* ══════════════════════════════════════════
-       PRINT
+       PRINT — A4 paysage
     ══════════════════════════════════════════ */
     @media print {
-      body { background: white !important; color: #000 !important; }
-      body::before, body::after { display: none; }
-      header, .intro, .step-header, .option-grid, .detail-panel,
-      .btn-generate, .result-actions, .tag-subtitle { display: none !important; }
-      .result-card {
-        box-shadow: none !important;
-        border: 1px solid #ccc !important;
-        backdrop-filter: none !important;
-        background: #fff !important;
+
+      @page {
+        size: A4 landscape;
+        margin: 0;
       }
-      .tag-header { background: #f0f0f0 !important; }
-      .tag-type, .tag-subtitle, .tag-row-value { color: #000 !important; }
-      .tag-row-label, .tag-ref { color: #666 !important; }
-      .tag-row { background: #f9f9f9 !important; border-color: #ddd !important; }
-      .tag-perforation-line { border-color: #bbb !important; }
-      .tag-barcode span { background: #888 !important; }
+
+      /* forcer les fonds couleur */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* masquer tout sauf l'étiquette */
+      body {
+        background: #f0f2f8 !important;
+        min-height: unset;
+        display: block;
+      }
+      body::before, body::after { display: none !important; }
+
+      header, .intro, .step-header, .option-grid,
+      .detail-panel, .btn-generate, .result-actions { display: none !important; }
+
+      main {
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+        display: block;
+      }
+
+      /* centrage de la carte sur la page paysage */
+      .result-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 210mm;
+        padding: 14mm 20mm;
+        animation: none !important;
+      }
+
+      /* ── CARTE ── */
+      .result-card {
+        width: 220mm;
+        max-width: 220mm;
+        border-radius: 14px !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow:
+          0 0 0 1.5px rgba(0,0,0,.08),
+          0 6px 30px rgba(0,0,0,.12) !important;
+        background:
+          repeating-linear-gradient(
+            -45deg,
+            rgba(0,0,0,.012) 0px, rgba(0,0,0,.012) 1px,
+            transparent 1px, transparent 8px
+          ),
+          #ffffff !important;
+        border: none !important;
+        overflow: hidden;
+        page-break-inside: avoid;
+      }
+      .result-card::before { display: none !important; }
+
+      /* ── BANDEAU (garde sa couleur JS inline) ── */
+      .tag-header {
+        padding: 22px 28px 20px !important;
+        backdrop-filter: none !important;
+      }
+      /* garder noise + hatch (imprimés avec print-color-adjust) */
+      .tag-hole {
+        background: rgba(0,0,0,.35) !important;
+        border-color: rgba(255,255,255,.5) !important;
+      }
+      .tag-logo-badge {
+        backdrop-filter: none !important;
+        background: rgba(255,255,255,.22) !important;
+        border-color: rgba(255,255,255,.45) !important;
+      }
+      .tag-watermark { opacity: .1 !important; }
+      .tag-type {
+        color: #fff !important;
+        text-shadow: 0 1px 6px rgba(0,0,0,.3) !important;
+      }
+      .tag-subtitle { color: rgba(255,255,255,.65) !important; }
+
+      /* ── PERFORATION ── */
+      .tag-perforation::before,
+      .tag-perforation::after {
+        background: #f0f2f8 !important;
+        box-shadow: 0 0 0 1px #d0d5e0 !important;
+      }
+      .tag-perforation-line { border-color: #c8cfe0 !important; }
+
+      /* ── CORPS ── */
+      .tag-body {
+        background-image: radial-gradient(circle, rgba(0,0,50,.04) 1px, transparent 1px) !important;
+        background-size: 20px 20px !important;
+        padding: 18px 28px 22px !important;
+        gap: 10px !important;
+      }
+      .tag-row {
+        background: #f4f6fc !important;
+        border: 1.5px solid #e2e8f4 !important;
+        backdrop-filter: none !important;
+        padding: 13px 18px !important;
+      }
+      .tag-row-label { color: #8a97b8 !important; }
+      .tag-row-label svg { opacity: .55 !important; color: #8a97b8 !important; }
+      .tag-row-value {
+        font-size: 1.15rem !important;
+        color: #0f2044 !important;
+      }
+
+      /* ── PIED ── */
+      .tag-footer {
+        border-top: 1.5px solid #e2e8f4 !important;
+        padding: 12px 28px 16px !important;
+      }
+      .tag-footer-date { color: #a0aabf !important; }
+      .tag-barcode span {
+        background: #c0cadd !important;
+        opacity: 1 !important;
+      }
     }
 
     /* ══════════════════════════════════════════
