@@ -6,363 +6,610 @@
   <title>Identification Palettes</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
+    /* ══════════════════════════════════════════
+       TOKENS
+    ══════════════════════════════════════════ */
     :root {
-      --blue-dark:  #1a2f4e;
-      --blue-mid:   #2563eb;
-      --blue-light: #dbeafe;
-      --accent:     #f59e0b;
-      --green:      #16a34a;
-      --red:        #dc2626;
-      --orange:     #ea580c;
-      --purple:     #7c3aed;
-      --bg:         #f0f4f8;
-      --card:       #ffffff;
-      --text:       #1e293b;
-      --muted:      #64748b;
-      --border:     #e2e8f0;
-      --radius:     14px;
-      --shadow:     0 4px 24px rgba(30,41,59,.10);
+      --navy:       #0f2044;
+      --navy-mid:   #1a3260;
+      --navy-light: #e8edf7;
+      --blue:       #1d4ed8;
+      --blue-soft:  #eff4ff;
+      --accent:     #e8a020;
+      --white:      #ffffff;
+      --bg:         #f4f6fb;
+      --surface:    #ffffff;
+      --border:     #e4e8f0;
+      --text:       #0f2044;
+      --text-mid:   #3d5280;
+      --text-muted: #8a97b0;
+      --radius-sm:  6px;
+      --radius:     10px;
+      --radius-lg:  14px;
+      --shadow-sm:  0 1px 4px rgba(15,32,68,.07);
+      --shadow:     0 2px 12px rgba(15,32,68,.09);
+      --shadow-md:  0 4px 24px rgba(15,32,68,.12);
+
+      /* per-type colours */
+      --c-retour:   #e06c1a;
+      --c-doublon:  #6b3fa0;
+      --c-attente:  #c08000;
+      --c-um:       #c0262a;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    /* ══════════════════════════════════════════
+       RESET
+    ══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
     }
 
-    /* ── HEADER ── */
-    header {
-      background: linear-gradient(135deg, var(--blue-dark) 0%, #243e63 100%);
-      padding: 20px 32px;
+    /* ══════════════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════════════ */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: var(--navy);
       display: flex;
-      align-items: center;
-      gap: 16px;
-      box-shadow: 0 2px 12px rgba(0,0,0,.25);
+      flex-direction: column;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
     }
-    .header-icon {
-      width: 52px; height: 52px;
+
+    .sidebar-brand {
+      padding: 28px 20px 24px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .brand-logo {
+      width: 40px; height: 40px;
       background: var(--accent);
-      border-radius: 12px;
+      border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 26px;
+      font-size: 20px;
+      margin-bottom: 12px;
     }
-    .header-text h1 {
+    .brand-name {
       color: #fff;
-      font-size: 1.5rem;
+      font-size: .88rem;
       font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      line-height: 1.3;
+    }
+    .brand-sub {
+      color: rgba(255,255,255,.4);
+      font-size: .72rem;
+      margin-top: 3px;
       letter-spacing: .3px;
     }
-    .header-text p {
-      color: #94a3b8;
-      font-size: .85rem;
-      margin-top: 2px;
-    }
 
-    /* ── MAIN ── */
-    main {
-      flex: 1;
-      max-width: 680px;
-      width: 100%;
-      margin: 32px auto;
-      padding: 0 16px 40px;
+    .sidebar-section {
+      padding: 20px 14px 8px;
     }
-
-    /* ── STEP LABEL ── */
-    .step-label {
-      font-size: .72rem;
+    .sidebar-section-title {
+      font-size: .65rem;
       font-weight: 700;
-      letter-spacing: 1.2px;
+      letter-spacing: 1.4px;
       text-transform: uppercase;
-      color: var(--muted);
+      color: rgba(255,255,255,.3);
+      padding: 0 6px;
       margin-bottom: 8px;
     }
 
-    /* ── SELECT CARD ── */
-    .select-card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-    .select-card label {
-      display: block;
-      font-weight: 600;
-      font-size: 1rem;
-      margin-bottom: 12px;
-      color: var(--text);
-    }
-
-    /* ── DROPDOWN TILES (grid of big buttons) ── */
-    .option-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .option-tile {
-      cursor: pointer;
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      text-align: center;
-      transition: all .18s ease;
-      background: #fff;
-      user-select: none;
-    }
-    .option-tile:hover {
-      border-color: var(--blue-mid);
-      background: #eff6ff;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(37,99,235,.12);
-    }
-    .option-tile.active {
-      border-color: var(--blue-mid);
-      background: var(--blue-light);
-      box-shadow: 0 0 0 3px rgba(37,99,235,.18);
-    }
-    .option-tile .tile-icon {
-      font-size: 2rem;
-      line-height: 1;
-    }
-    .option-tile .tile-label {
-      font-size: .88rem;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1.3;
-    }
-
-    /* Override active colour per type */
-    .option-tile[data-type="retour"].active       { border-color: var(--orange); background: #fff7ed; box-shadow: 0 0 0 3px rgba(234,88,12,.15); }
-    .option-tile[data-type="doublon"].active      { border-color: var(--purple); background: #f5f3ff; box-shadow: 0 0 0 3px rgba(124,58,237,.15); }
-    .option-tile[data-type="attente"].active      { border-color: var(--accent);  background: #fffbeb; box-shadow: 0 0 0 3px rgba(245,158,11,.15); }
-    .option-tile[data-type="um"].active           { border-color: var(--red);     background: #fef2f2; box-shadow: 0 0 0 3px rgba(220,38,38,.15); }
-
-    /* ── DETAIL PANEL ── */
-    .detail-panel {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 28px;
-      margin-bottom: 24px;
-      animation: slideDown .22s ease;
-    }
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .panel-title {
+    .nav-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 24px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      color: rgba(255,255,255,.55);
+      font-size: .82rem;
+      font-weight: 500;
+      letter-spacing: .2px;
+      margin-bottom: 2px;
     }
-    .panel-title .badge {
+    .nav-item:hover {
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.85);
+    }
+    .nav-item.active {
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-weight: 600;
+    }
+    .nav-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .nav-dot-retour  { background: var(--c-retour); }
+    .nav-dot-doublon { background: var(--c-doublon); }
+    .nav-dot-attente { background: var(--c-attente); }
+    .nav-dot-um      { background: var(--c-um); }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,.07);
+      font-size: .72rem;
+      color: rgba(255,255,255,.25);
+      line-height: 1.5;
+    }
+
+    /* ══════════════════════════════════════════
+       MAIN LAYOUT
+    ══════════════════════════════════════════ */
+    .page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+    .topbar-left .sep { color: var(--border); }
+    .topbar-left .current { color: var(--text); font-weight: 600; }
+    .topbar-date {
+      font-size: .78rem;
+      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 999px;
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      flex: 1;
+      padding: 32px;
+      max-width: 820px;
+      width: 100%;
+    }
+
+    /* ── PAGE TITLE ── */
+    .page-title {
+      margin-bottom: 28px;
+    }
+    .page-title h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -.2px;
+    }
+    .page-title p {
+      font-size: .83rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ══════════════════════════════════════════
+       STEP SECTION
+    ══════════════════════════════════════════ */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .step-badge {
+      width: 22px; height: 22px;
+      background: var(--navy);
+      color: #fff;
+      font-size: .7rem;
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--text-mid);
+    }
+
+    /* ══════════════════════════════════════════
+       OPTION GRID
+    ══════════════════════════════════════════ */
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .option-tile {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 12px 18px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      transition: border-color .15s, box-shadow .15s, transform .15s;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .option-tile::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .option-tile:hover {
+      border-color: #b8c4de;
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .option-tile.active {
+      border-color: transparent;
+      box-shadow: 0 0 0 2px currentColor, var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .option-tile.active::before { opacity: 1; }
+
+    .option-tile[data-type="retour"]  { --tc: var(--c-retour); }
+    .option-tile[data-type="doublon"] { --tc: var(--c-doublon); }
+    .option-tile[data-type="attente"] { --tc: var(--c-attente); }
+    .option-tile[data-type="um"]      { --tc: var(--c-um); }
+
+    .option-tile.active  { color: var(--tc); }
+    .option-tile::before { background: var(--tc); }
+
+    .tile-icon-wrap {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    .option-tile.active .tile-icon-wrap {
+      background: color-mix(in srgb, var(--tc) 12%, white);
+    }
+
+    .tile-label {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+    }
+    .option-tile.active .tile-label { color: var(--tc); }
+
+    /* ══════════════════════════════════════════
+       DETAIL CARD
+    ══════════════════════════════════════════ */
+    .detail-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      overflow: hidden;
+      animation: fadeUp .2s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .detail-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .detail-card-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .type-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 14px;
+      padding: 4px 12px;
       border-radius: 999px;
-      font-size: .82rem;
+      font-size: .75rem;
       font-weight: 700;
       letter-spacing: .3px;
+      border: 1.5px solid;
     }
-    .badge-orange { background: #fff7ed; color: var(--orange); border: 1.5px solid #fed7aa; }
-    .badge-purple { background: #f5f3ff; color: var(--purple); border: 1.5px solid #ddd6fe; }
-    .badge-yellow { background: #fffbeb; color: #b45309;       border: 1.5px solid #fde68a; }
-    .badge-red    { background: #fef2f2; color: var(--red);    border: 1.5px solid #fecaca; }
+    .pill-retour  { color: var(--c-retour);  background: #fff4ec; border-color: #fcd5b0; }
+    .pill-doublon { color: var(--c-doublon); background: #f3eeff; border-color: #d9c8f5; }
+    .pill-attente { color: var(--c-attente); background: #fffaeb; border-color: #fde68a; }
+    .pill-um      { color: var(--c-um);      background: #fff1f2; border-color: #ffc9cc; }
 
-    /* ── FORM FIELDS ── */
-    .field { margin-bottom: 20px; }
-    .field label {
-      display: block;
-      font-size: .82rem;
-      font-weight: 600;
+    .detail-card-body { padding: 24px 22px; }
+
+    /* ── FORM ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .7px;
       text-transform: uppercase;
-      letter-spacing: .6px;
-      color: var(--muted);
-      margin-bottom: 8px;
+      color: var(--text-muted);
     }
     .field select,
-    .field input[type="date"],
-    .field input[type="text"] {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      font-size: 1rem;
+    .field input[type="date"] {
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: .92rem;
       color: var(--text);
-      background: #fff;
+      background: var(--surface);
       appearance: none;
-      transition: border-color .15s;
       outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      font-family: inherit;
     }
     .field select:focus,
     .field input:focus {
-      border-color: var(--blue-mid);
-      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(29,78,216,.10);
     }
-    .select-wrapper {
-      position: relative;
-    }
-    .select-wrapper::after {
-      content: '▾';
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '';
       position: absolute;
-      right: 14px;
-      top: 50%;
+      right: 13px; top: 50%;
       transform: translateY(-50%);
-      color: var(--muted);
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid var(--text-muted);
       pointer-events: none;
-      font-size: 1rem;
     }
 
-    /* ── SIMPLE INFO PANEL (no form) ── */
-    .info-panel {
-      border-radius: 10px;
-      padding: 18px 20px;
-      font-size: .95rem;
+    /* ── INFO BOX ── */
+    .info-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid;
+      font-size: .84rem;
       line-height: 1.6;
-      font-weight: 500;
     }
-    .info-panel-purple { background: #f5f3ff; border: 1.5px solid #ddd6fe; color: #4c1d95; }
-    .info-panel-yellow { background: #fffbeb; border: 1.5px solid #fde68a; color: #78350f; }
-    .info-panel-red    { background: #fef2f2; border: 1.5px solid #fecaca; color: #7f1d1d; }
+    .info-box strong { display: block; font-size: .86rem; margin-bottom: 2px; }
+    .info-box-doublon { background: #f6f2ff; border-color: var(--c-doublon); color: #3b2068; }
+    .info-box-attente { background: #fffdf0; border-color: var(--c-attente); color: #6b4800; }
+    .info-box-um      { background: #fff5f5; border-color: var(--c-um);      color: #7a1010; }
+    .info-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
 
-    /* ── GENERATE BUTTON ── */
+    /* ══════════════════════════════════════════
+       GENERATE BUTTON
+    ══════════════════════════════════════════ */
     .btn-generate {
       width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, var(--blue-mid), #1d4ed8);
+      padding: 14px 20px;
+      background: var(--navy);
       color: #fff;
       border: none;
       border-radius: var(--radius);
-      font-size: 1.05rem;
+      font-size: .92rem;
       font-weight: 700;
-      letter-spacing: .4px;
+      letter-spacing: .3px;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(37,99,235,.35);
-      transition: all .18s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 9px;
+      transition: background .15s, transform .12s, box-shadow .15s;
+      box-shadow: 0 2px 8px rgba(15,32,68,.25);
+      font-family: inherit;
     }
     .btn-generate:hover {
-      background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
+      background: var(--navy-mid);
+      box-shadow: 0 4px 16px rgba(15,32,68,.30);
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(37,99,235,.4);
     }
     .btn-generate:active { transform: translateY(0); }
+    .btn-generate svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-    /* ── ÉTIQUETTE / RESULT ── */
+    /* ══════════════════════════════════════════
+       RESULT CARD
+    ══════════════════════════════════════════ */
     .result-card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
       overflow: hidden;
-      margin-bottom: 24px;
-      animation: slideDown .25s ease;
+      margin-bottom: 20px;
+      animation: fadeUp .22s ease;
     }
-    .result-header {
-      padding: 14px 22px;
+
+    .result-stripe {
+      height: 5px;
+    }
+
+    .result-inner {
+      padding: 24px 24px 20px;
+    }
+
+    .result-meta {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-bottom: 18px;
     }
-    .result-header span {
-      font-size: .78rem;
+    .result-label {
+      font-size: .68rem;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
-      color: rgba(255,255,255,.85);
+      color: var(--text-muted);
     }
-    .result-header .result-icon { font-size: 1.4rem; }
-    .result-body {
-      padding: 24px 22px;
-    }
-    .result-type {
-      font-size: 1.4rem;
-      font-weight: 800;
-      margin-bottom: 16px;
-      line-height: 1.2;
-    }
-    .result-rows { display: flex; flex-direction: column; gap: 10px; }
-    .result-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 14px;
-      background: var(--bg);
-      border-radius: 8px;
-      font-size: .9rem;
-    }
-    .result-row .rkey {
-      color: var(--muted);
+    .result-id {
+      font-size: .7rem;
       font-weight: 600;
-      font-size: .78rem;
-      text-transform: uppercase;
-      letter-spacing: .5px;
+      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 999px;
+      letter-spacing: .3px;
     }
-    .result-row .rval {
+
+    .result-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -.3px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .result-title-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .result-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 18px 0;
+    }
+
+    .result-fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .result-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .result-field-key {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .result-field-val {
+      font-size: 1rem;
       font-weight: 700;
       color: var(--text);
     }
-    .btn-print {
-      margin-top: 20px;
-      width: 100%;
-      padding: 13px;
-      background: #f8fafc;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      font-size: .9rem;
+
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      flex: 1;
+      min-width: 130px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: .82rem;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 7px;
       transition: all .15s;
+      font-family: inherit;
+      letter-spacing: .2px;
+    }
+    .btn-pdf {
+      background: var(--navy);
+      color: #fff;
+      border: 1.5px solid var(--navy);
+    }
+    .btn-pdf:hover { background: var(--navy-mid); }
+
+    .btn-print-paper {
+      background: var(--surface);
       color: var(--text);
+      border: 1.5px solid var(--border);
     }
-    .btn-print:hover { background: var(--blue-light); border-color: var(--blue-mid); color: var(--blue-mid); }
-    .btn-print-paper:hover { background: #f0fdf4; border-color: var(--green); color: var(--green); }
-    .action-row { display: flex; gap: 10px; margin-top: 20px; }
-    .action-row .btn-print { margin-top: 0; flex: 1; }
+    .btn-print-paper:hover { background: var(--bg); border-color: #9aaac5; }
 
-    .btn-reset {
-      margin-top: 10px;
-      width: 100%;
-      padding: 12px;
-      background: transparent;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      font-size: .9rem;
-      font-weight: 600;
-      cursor: pointer;
-      color: var(--muted);
-      transition: all .15s;
+    .btn-new {
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1.5px solid var(--border);
     }
-    .btn-reset:hover { border-color: #94a3b8; color: var(--text); }
+    .btn-new:hover { color: var(--text); border-color: #9aaac5; }
 
-    /* ── PRINT ── */
+    /* ══════════════════════════════════════════
+       PRINT
+    ══════════════════════════════════════════ */
     @media print {
-      header, .select-card, .detail-panel, .btn-generate, .action-row, .btn-reset { display: none !important; }
-      .result-card { box-shadow: none; border: 2px solid #000; }
+      .sidebar, .topbar, .page-title, .option-grid,
+      .section-header, .detail-card, .btn-generate,
+      .result-actions, .section-header { display: none !important; }
+      body { background: white; }
+      .result-card { box-shadow: none; border: 1px solid #ccc; }
     }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 480px) {
-      .option-grid { grid-template-columns: 1fr; }
-      header { padding: 16px 20px; }
-      main { margin: 20px auto; }
+    /* ══════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════ */
+    @media (max-width: 900px) {
+      .option-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .sidebar { display: none; }
+      .content { padding: 20px 16px; }
+      .topbar { padding: 0 16px; }
+      .option-grid { grid-template-columns: 1fr 1fr; }
+      .form-row { grid-template-columns: 1fr; }
     }
 
     .hidden { display: none !important; }
@@ -370,282 +617,407 @@
 </head>
 <body>
 
-<header>
-  <div class="header-icon">📦</div>
-  <div class="header-text">
-    <h1>Identification Palettes</h1>
-    <p>Système d'étiquetage entrepôt</p>
+<!-- ══════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">📦</div>
+    <div class="brand-name">Identification<br>Palettes</div>
+    <div class="brand-sub">Système d'étiquetage entrepôt</div>
   </div>
-</header>
 
-<main>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Catégories</div>
 
-  <!-- ÉTAPE 1 — choix du type -->
-  <div class="select-card">
-    <p class="step-label">Étape 1 — Type d'identification</p>
-    <label>Sélectionnez une catégorie</label>
+    <button class="nav-item" id="nav-retour" onclick="selectType('retour')">
+      <span class="nav-dot nav-dot-retour"></span>
+      Retour marchandise
+    </button>
+    <button class="nav-item" id="nav-doublon" onclick="selectType('doublon')">
+      <span class="nav-dot nav-dot-doublon"></span>
+      Doublon silo
+    </button>
+    <button class="nav-item" id="nav-attente" onclick="selectType('attente')">
+      <span class="nav-dot nav-dot-attente"></span>
+      En attente de réception
+    </button>
+    <button class="nav-item" id="nav-um" onclick="selectType('um')">
+      <span class="nav-dot nav-dot-um"></span>
+      UM non trouvé
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    v1.0 &mdash; <span id="sb-date"></span>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════
+     PAGE
+══════════════════════════════════════════ -->
+<div class="page">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <span>Entrepôt</span>
+      <span class="sep">/</span>
+      <span class="current">Nouvelle étiquette</span>
+    </div>
+    <div class="topbar-date" id="top-date"></div>
+  </div>
+
+  <div class="content">
+
+    <div class="page-title">
+      <h2>Identification palette</h2>
+      <p>Sélectionnez un type, renseignez les informations, puis générez l'étiquette.</p>
+    </div>
+
+    <!-- ÉTAPE 1 -->
+    <div class="section-header">
+      <div class="step-badge">1</div>
+      <span class="section-title">Type d'identification</span>
+    </div>
+
     <div class="option-grid">
-
       <div class="option-tile" data-type="retour" onclick="selectType('retour')">
-        <span class="tile-icon">🔄</span>
-        <span class="tile-label">Retour marchandise</span>
+        <div class="tile-icon-wrap">🔄</div>
+        <span class="tile-label">Retour<br>marchandise</span>
       </div>
-
       <div class="option-tile" data-type="doublon" onclick="selectType('doublon')">
-        <span class="tile-icon">🔁</span>
-        <span class="tile-label">Doublon silo</span>
+        <div class="tile-icon-wrap">🔁</div>
+        <span class="tile-label">Doublon<br>silo</span>
       </div>
-
       <div class="option-tile" data-type="attente" onclick="selectType('attente')">
-        <span class="tile-icon">⏳</span>
-        <span class="tile-label">En attente de réception</span>
+        <div class="tile-icon-wrap">⏳</div>
+        <span class="tile-label">En attente<br>de réception</span>
       </div>
-
       <div class="option-tile" data-type="um" onclick="selectType('um')">
-        <span class="tile-icon">🔍</span>
-        <span class="tile-label">UM non trouvé dans l'entrepôt</span>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ÉTAPE 2 — détail selon le type -->
-  <div id="panel-retour" class="detail-panel hidden">
-    <div class="panel-title">
-      <span class="badge badge-orange">🔄 Retour marchandise</span>
-    </div>
-
-    <div class="field">
-      <label>Transporteur</label>
-      <div class="select-wrapper">
-        <select id="transporteur">
-          <option value="">— Sélectionner un transporteur —</option>
-          <option>Dispam</option>
-          <option>Bernard</option>
-          <option>Coquelle Peyro</option>
-          <option>Portugal</option>
-          <option>Hollande</option>
-          <option>Compans</option>
-          <option>DTS</option>
-          <option>Omnitrans</option>
-          <option>TFE</option>
-          <option>Ceva</option>
-          <option>Sagil</option>
-          <option>Autre</option>
-        </select>
+        <div class="tile-icon-wrap">🔍</div>
+        <span class="tile-label">UM non trouvé<br>en entrepôt</span>
       </div>
     </div>
 
-    <div class="field">
-      <label>Date</label>
-      <input type="date" id="date-retour" />
+    <!-- ÉTAPE 2 -->
+    <div id="step2-header" class="section-header hidden">
+      <div class="step-badge">2</div>
+      <span class="section-title">Informations</span>
     </div>
-  </div>
 
-  <div id="panel-doublon" class="detail-panel hidden">
-    <div class="panel-title">
-      <span class="badge badge-purple">🔁 Doublon silo</span>
-    </div>
-    <div class="info-panel info-panel-purple">
-      Cette palette est identifiée comme <strong>doublon silo</strong>.<br>
-      Aucune information complémentaire requise.
-    </div>
-  </div>
-
-  <div id="panel-attente" class="detail-panel hidden">
-    <div class="panel-title">
-      <span class="badge badge-yellow">⏳ En attente de réception</span>
-    </div>
-    <div class="info-panel info-panel-yellow">
-      Cette palette est en <strong>attente de réception</strong>.<br>
-      Elle sera traitée lors de la prochaine réception.
-    </div>
-  </div>
-
-  <div id="panel-um" class="detail-panel hidden">
-    <div class="panel-title">
-      <span class="badge badge-red">🔍 UM non trouvé</span>
-    </div>
-    <div class="info-panel info-panel-red">
-      <strong>UM non trouvé dans l'entrepôt.</strong><br>
-      Merci de signaler ce cas au responsable logistique.
-    </div>
-  </div>
-
-  <!-- BOUTON GÉNÉRER -->
-  <button id="btn-gen" class="btn-generate hidden" onclick="generate()">
-    <span>🏷️</span> Générer l'étiquette
-  </button>
-
-  <!-- RÉSULTAT -->
-  <div id="result-card" class="result-card hidden">
-    <div id="result-header" class="result-header">
-      <span>Étiquette palette</span>
-      <span id="result-header-icon" class="result-icon"></span>
-    </div>
-    <div class="result-body">
-      <div id="result-type" class="result-type"></div>
-      <div id="result-rows" class="result-rows"></div>
-      <div class="action-row">
-        <button class="btn-print" onclick="exportPDF()">📄 Exporter PDF</button>
-        <button class="btn-print btn-print-paper" onclick="window.print()">🖨️ Imprimer</button>
+    <!-- Panel retour -->
+    <div id="panel-retour" class="detail-card hidden">
+      <div class="detail-card-header">
+        <div class="detail-card-header-left">
+          <span class="type-pill pill-retour">🔄 Retour marchandise</span>
+        </div>
       </div>
-      <button class="btn-reset" onclick="reset()">↩ Nouvelle étiquette</button>
+      <div class="detail-card-body">
+        <div class="form-row">
+          <div class="field">
+            <label class="field-label">Transporteur</label>
+            <div class="select-wrap">
+              <select id="transporteur">
+                <option value="">— Sélectionner —</option>
+                <option>Dispam</option>
+                <option>Bernard</option>
+                <option>Coquelle Peyro</option>
+                <option>Portugal</option>
+                <option>Hollande</option>
+                <option>Compans</option>
+                <option>DTS</option>
+                <option>Omnitrans</option>
+                <option>TFE</option>
+                <option>Ceva</option>
+                <option>Sagil</option>
+                <option>Autre</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Date du retour</label>
+            <input type="date" id="date-retour" />
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-</main>
+    <!-- Panel doublon -->
+    <div id="panel-doublon" class="detail-card hidden">
+      <div class="detail-card-header">
+        <span class="type-pill pill-doublon">🔁 Doublon silo</span>
+      </div>
+      <div class="detail-card-body">
+        <div class="info-box info-box-doublon">
+          <span class="info-icon">ℹ️</span>
+          <div>
+            <strong>Doublon silo identifié</strong>
+            Cette palette est un doublon dans le silo. Aucune information complémentaire n'est requise.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel attente -->
+    <div id="panel-attente" class="detail-card hidden">
+      <div class="detail-card-header">
+        <span class="type-pill pill-attente">⏳ En attente de réception</span>
+      </div>
+      <div class="detail-card-body">
+        <div class="info-box info-box-attente">
+          <span class="info-icon">⏳</span>
+          <div>
+            <strong>En attente de réception</strong>
+            Cette palette sera traitée lors de la prochaine réception. Aucune action immédiate requise.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel UM -->
+    <div id="panel-um" class="detail-card hidden">
+      <div class="detail-card-header">
+        <span class="type-pill pill-um">🔍 UM non trouvé</span>
+      </div>
+      <div class="detail-card-body">
+        <div class="info-box info-box-um">
+          <span class="info-icon">⚠️</span>
+          <div>
+            <strong>UM non trouvé dans l'entrepôt</strong>
+            Merci de signaler ce cas au responsable logistique. Un suivi est nécessaire.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOUTON GÉNÉRER -->
+    <button id="btn-gen" class="btn-generate hidden" onclick="generate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/>
+        <line x1="12" y1="8" x2="12" y2="16"/>
+      </svg>
+      Générer l'étiquette
+    </button>
+
+    <!-- RÉSULTAT -->
+    <div id="result-card" class="result-card hidden">
+      <div id="result-stripe" class="result-stripe"></div>
+      <div class="result-inner">
+
+        <div class="result-meta">
+          <span class="result-label">Étiquette générée</span>
+          <span class="result-id" id="result-id"></span>
+        </div>
+
+        <div class="result-title">
+          <span id="result-dot" class="result-title-dot"></span>
+          <span id="result-type"></span>
+        </div>
+
+        <div class="result-divider"></div>
+        <div id="result-fields" class="result-fields"></div>
+
+        <div class="result-actions">
+          <button class="btn-action btn-pdf" onclick="exportPDF()">
+            <svg viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+            </svg>
+            Exporter PDF
+          </button>
+          <button class="btn-action btn-print-paper" onclick="window.print()">
+            <svg viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="6,9 6,2 18,2 18,9"/>
+              <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            Imprimer
+          </button>
+          <button class="btn-action btn-new" onclick="reset()">
+            <svg viewBox="0 0 24 24" width="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="1,4 1,10 7,10"/>
+              <path d="M3.51 15a9 9 0 1 0 .49-4.54"/>
+            </svg>
+            Nouvelle
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /page -->
 
 <script>
+  /* ── CONFIG ── */
   const TYPES = {
-    retour:  { label: 'Retour marchandise',            icon: '🔄', headerClass: 'bg-orange' },
-    doublon: { label: 'Doublon silo',                  icon: '🔁', headerClass: 'bg-purple' },
-    attente: { label: 'En attente de réception',       icon: '⏳', headerClass: 'bg-yellow' },
-    um:      { label: 'UM non trouvé en entrepôt',     icon: '🔍', headerClass: 'bg-red'    },
-  };
-
-  const HEADER_COLORS = {
-    retour:  'linear-gradient(135deg,#ea580c,#c2410c)',
-    doublon: 'linear-gradient(135deg,#7c3aed,#5b21b6)',
-    attente: 'linear-gradient(135deg,#f59e0b,#d97706)',
-    um:      'linear-gradient(135deg,#dc2626,#991b1b)',
+    retour:  { label: 'Retour marchandise',        icon: '🔄', color: [224,108,26],  hex: '#e06c1a' },
+    doublon: { label: 'Doublon silo',              icon: '🔁', color: [107,63,160],  hex: '#6b3fa0' },
+    attente: { label: 'En attente de réception',   icon: '⏳', color: [192,128,0],   hex: '#c08000' },
+    um:      { label: 'UM non trouvé en entrepôt', icon: '🔍', color: [192,38,42],   hex: '#c0262a' },
   };
 
   let currentType = null;
 
+  /* ── DATE LIVE ── */
+  function initDates() {
+    const now    = new Date();
+    const locale = 'fr-FR';
+    const d = now.toLocaleDateString(locale, { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    document.getElementById('top-date').textContent = d.charAt(0).toUpperCase() + d.slice(1);
+    document.getElementById('sb-date').textContent  = now.toLocaleDateString(locale, { day:'2-digit', month:'2-digit', year:'numeric' });
+  }
+  initDates();
+
+  /* ── SELECT TYPE ── */
   function selectType(type) {
     currentType = type;
 
-    // highlight tile
+    // tiles
     document.querySelectorAll('.option-tile').forEach(t => t.classList.remove('active'));
     document.querySelector(`.option-tile[data-type="${type}"]`).classList.add('active');
 
-    // show correct panel
-    ['retour','doublon','attente','um'].forEach(t => {
-      document.getElementById(`panel-${t}`).classList.add('hidden');
-    });
-    document.getElementById(`panel-${type}`).classList.remove('hidden');
+    // nav
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(`nav-${type}`).classList.add('active');
 
-    // show generate button
+    // panels
+    ['retour','doublon','attente','um'].forEach(t =>
+      document.getElementById(`panel-${t}`).classList.add('hidden')
+    );
+    document.getElementById(`panel-${type}`).classList.remove('hidden');
+    document.getElementById('step2-header').classList.remove('hidden');
+
+    // generate button
     document.getElementById('btn-gen').classList.remove('hidden');
 
-    // hide previous result
+    // hide result
     document.getElementById('result-card').classList.add('hidden');
 
-    // set today as default date for retour
+    // default date
     if (type === 'retour') {
       const d = document.getElementById('date-retour');
       if (!d.value) d.value = new Date().toISOString().split('T')[0];
     }
   }
 
+  /* ── GENERATE ── */
   function generate() {
     const t = currentType;
     if (!t) return;
 
-    let rows = [];
+    const cfg = TYPES[t];
+    const now = new Date();
+
+    let fields = [];
 
     if (t === 'retour') {
       const transporteur = document.getElementById('transporteur').value;
       const date         = document.getElementById('date-retour').value;
       if (!transporteur) { alert('Veuillez sélectionner un transporteur.'); return; }
       if (!date)         { alert('Veuillez sélectionner une date.'); return; }
-      rows = [
+      fields = [
         { key: 'Transporteur', val: transporteur },
-        { key: 'Date', val: formatDate(date) },
-        { key: 'Heure', val: new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) },
+        { key: 'Date du retour', val: formatDate(date) },
+        { key: 'Heure d\'édition', val: now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) },
       ];
     } else {
-      rows = [
-        { key: 'Enregistré le', val: new Date().toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) },
-        { key: 'Heure',         val: new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) },
+      fields = [
+        { key: 'Enregistré le', val: now.toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) },
+        { key: 'Heure', val: now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) },
       ];
     }
 
-    // fill result
-    const cfg = TYPES[t];
-    document.getElementById('result-header').style.background = HEADER_COLORS[t];
-    document.getElementById('result-header-icon').textContent = cfg.icon;
+    // stripe colour
+    document.getElementById('result-stripe').style.background = cfg.hex;
+
+    // dot
+    document.getElementById('result-dot').style.background = cfg.hex;
+
+    // id
+    const id = 'PAL-' + now.getFullYear().toString().slice(-2)
+             + String(now.getMonth()+1).padStart(2,'0')
+             + String(now.getDate()).padStart(2,'0')
+             + '-' + String(Math.floor(Math.random()*9000)+1000);
+    document.getElementById('result-id').textContent = id;
+
+    // type label
     document.getElementById('result-type').textContent = cfg.label;
 
-    const rowsEl = document.getElementById('result-rows');
-    rowsEl.innerHTML = rows.map(r =>
-      `<div class="result-row"><span class="rkey">${r.key}</span><span class="rval">${r.val}</span></div>`
-    ).join('');
+    // fields
+    document.getElementById('result-fields').innerHTML = fields.map(f => `
+      <div class="result-field">
+        <span class="result-field-key">${f.key}</span>
+        <span class="result-field-val">${f.val}</span>
+      </div>
+    `).join('');
 
     document.getElementById('result-card').classList.remove('hidden');
-    document.getElementById('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('result-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
+  /* ── FORMAT DATE ── */
   function formatDate(iso) {
     const [y,m,d] = iso.split('-');
     return `${d}/${m}/${y}`;
   }
 
+  /* ── EXPORT PDF ── */
   function exportPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
     const t   = currentType;
     const cfg = TYPES[t];
-
-    // ── couleurs par type
-    const colors = {
-      retour:  [234, 88,  12],
-      doublon: [124, 58, 237],
-      attente: [245,158, 11],
-      um:      [220, 38,  38],
-    };
-    const col = colors[t];
-
-    const W = 210, pageH = 297;
-    const marginX = 20;
-
-    // ── Bandeau d'en-tête
-    doc.setFillColor(...col);
-    doc.rect(0, 0, W, 40, 'F');
-
-    // Logo/icone placeholder
-    doc.setFillColor(255,255,255,0.2);
-    doc.roundedRect(marginX, 8, 24, 24, 4, 4, 'F');
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(18);
-    doc.text(cfg.icon ?? '📦', marginX + 12, 24, { align: 'center' });
-
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(20);
-    doc.setFont('helvetica','bold');
-    doc.text('IDENTIFICATION PALETTE', marginX + 32, 18);
-    doc.setFontSize(11);
-    doc.setFont('helvetica','normal');
-    doc.text(cfg.label.toUpperCase(), marginX + 32, 28);
-
-    // ── Numéro & date génération (coin droit)
+    const col = cfg.color;
     const now = new Date();
+    const W   = 210;
+    const mX  = 20;
+
     const genDate = now.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
     const genTime = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    const refId   = document.getElementById('result-id').textContent;
+
+    // ── Bande de couleur
+    doc.setFillColor(...col);
+    doc.rect(0, 0, 5, 297, 'F');
+
+    // ── En-tête
+    doc.setFillColor(15, 32, 68);
+    doc.rect(0, 0, W, 36, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(255, 255, 255);
+    doc.text('IDENTIFICATION PALETTE', mX, 16);
+
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.setTextColor(255,255,255);
-    doc.text(`Édité le ${genDate} à ${genTime}`, W - marginX, 34, { align:'right' });
+    doc.setTextColor(138, 151, 176);
+    doc.text('Système d\'étiquetage entrepôt', mX, 24);
 
-    // ── Corps
-    let y = 60;
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`Réf. ${refId}`, W - mX, 13, { align: 'right' });
+    doc.setTextColor(138, 151, 176);
+    doc.text(`Édité le ${genDate} à ${genTime}`, W - mX, 22, { align: 'right' });
 
-    // Titre du type
-    doc.setFillColor(...col.map(c => Math.min(255, c + 200)));
-    doc.roundedRect(marginX, y - 8, W - marginX*2, 18, 3, 3, 'F');
+    // ── Type badge
+    let y = 52;
+    doc.setFillColor(...col.map(c => Math.min(255, c + 185)));
+    doc.roundedRect(mX, y, W - mX * 2, 14, 3, 3, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
     doc.setTextColor(...col);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(14);
-    doc.text(cfg.label, marginX + 8, y + 4);
+    doc.text(cfg.label.toUpperCase(), mX + 6, y + 9.5);
     y += 26;
 
-    // Lignes de détail
+    // ── Champs
     const rows = [];
     if (t === 'retour') {
-      const transporteur = document.getElementById('transporteur').value;
-      const date         = document.getElementById('date-retour').value;
-      rows.push({ key: 'Transporteur', val: transporteur });
+      const tr   = document.getElementById('transporteur').value;
+      const date = document.getElementById('date-retour').value;
+      rows.push({ key: 'Transporteur',   val: tr });
       rows.push({ key: 'Date du retour', val: formatDate(date) });
       rows.push({ key: 'Heure d\'édition', val: genTime });
     } else {
@@ -654,60 +1026,57 @@
     }
 
     rows.forEach((r, i) => {
-      const rowY = y + i * 18;
-      // fond alterné
+      const ry = y + i * 20;
       if (i % 2 === 0) {
-        doc.setFillColor(248, 250, 252);
-        doc.rect(marginX, rowY - 6, W - marginX*2, 16, 'F');
+        doc.setFillColor(244, 246, 251);
+        doc.rect(mX, ry - 5, W - mX * 2, 18, 'F');
       }
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(9);
-      doc.setTextColor(100,116,139);
-      doc.text(r.key.toUpperCase(), marginX + 6, rowY + 4);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(138, 151, 176);
+      doc.text(r.key.toUpperCase(), mX + 5, ry + 4);
 
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(12);
-      doc.setTextColor(30,41,59);
-      doc.text(r.val, W - marginX - 6, rowY + 4, { align:'right' });
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(15, 32, 68);
+      doc.text(r.val, W - mX - 5, ry + 4, { align: 'right' });
     });
 
-    y += rows.length * 18 + 20;
+    y += rows.length * 20 + 20;
 
-    // ── Zone de commentaire (optionnelle pour usage futur)
-    doc.setDrawColor(...col);
-    doc.setLineWidth(0.5);
-    doc.rect(marginX, y, W - marginX*2, 40);
-    doc.setFont('helvetica','italic');
-    doc.setFontSize(9);
-    doc.setTextColor(148,163,184);
-    doc.text('Commentaire / observations :', marginX + 4, y + 8);
-
-    y += 60;
-
-    // ── Pied de page avec ligne
-    doc.setDrawColor(226,232,240);
+    // ── Zone commentaire
+    doc.setDrawColor(228, 232, 240);
     doc.setLineWidth(0.4);
-    doc.line(marginX, pageH - 20, W - marginX, pageH - 20);
-    doc.setFont('helvetica','normal');
+    doc.roundedRect(mX, y, W - mX * 2, 42, 2, 2);
+    doc.setFont('helvetica', 'italic');
     doc.setFontSize(8);
-    doc.setTextColor(148,163,184);
-    doc.text('Identification Palettes — Système d\'étiquetage entrepôt', W / 2, pageH - 13, { align:'center' });
+    doc.setTextColor(138, 151, 176);
+    doc.text('Commentaire / observations :', mX + 5, y + 9);
 
-    // ── Téléchargement
-    const filename = `palette-${t}-${now.toISOString().slice(0,10)}.pdf`;
-    doc.save(filename);
+    // ── Pied de page
+    doc.setDrawColor(228, 232, 240);
+    doc.line(mX, 277, W - mX, 277);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(138, 151, 176);
+    doc.text('Identification Palettes — Système d\'étiquetage entrepôt', W / 2, 284, { align: 'center' });
+
+    doc.save(`palette-${t}-${now.toISOString().slice(0,10)}.pdf`);
   }
 
+  /* ── RESET ── */
   function reset() {
     currentType = null;
     document.querySelectorAll('.option-tile').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     ['retour','doublon','attente','um'].forEach(t =>
       document.getElementById(`panel-${t}`).classList.add('hidden')
     );
+    document.getElementById('step2-header').classList.add('hidden');
     document.getElementById('btn-gen').classList.add('hidden');
     document.getElementById('result-card').classList.add('hidden');
     document.getElementById('transporteur').value = '';
-    document.getElementById('date-retour').value = '';
+    document.getElementById('date-retour').value  = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 </script>
