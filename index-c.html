@@ -819,6 +819,83 @@
     }
 
     /* ══════════════════════════════════════════
+       PANEL TABS
+    ══════════════════════════════════════════ */
+    .panel-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    .panel-tab {
+      flex: 1;
+      padding: 9px 14px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.05);
+      border: 1.5px solid rgba(255,255,255,.09);
+      color: rgba(255,255,255,.42);
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all .16s;
+      font-family: inherit;
+    }
+    .panel-tab svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .panel-tab:hover:not(.active) {
+      background: rgba(255,255,255,.09);
+      color: rgba(255,255,255,.7);
+    }
+    .panel-tab.active {
+      background: rgba(255,255,255,.13);
+      border-color: rgba(255,255,255,.28);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,.2);
+    }
+    .tab-pane { }
+
+    /* textarea commentaire */
+    .comment-area {
+      width: 100%;
+      min-height: 88px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,.06);
+      border: 1.5px solid rgba(255,255,255,.12);
+      border-radius: 10px;
+      color: #fff;
+      font-size: .9rem;
+      font-family: inherit;
+      resize: vertical;
+      outline: none;
+      line-height: 1.55;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .comment-area::placeholder { color: rgba(255,255,255,.25); }
+    .comment-area:focus {
+      border-color: rgba(255,255,255,.3);
+      box-shadow: 0 0 0 3px rgba(255,255,255,.06);
+    }
+
+    /* commentaire sur l'étiquette */
+    .tag-row-full {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .tag-row-full .tag-row-value {
+      font-size: .92rem;
+      font-weight: 600;
+      line-height: 1.5;
+      text-align: left;
+      color: rgba(255,255,255,.85);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* ══════════════════════════════════════════
        RESPONSIVE
     ══════════════════════════════════════════ */
     @media (max-width: 560px) {
@@ -899,68 +976,107 @@
 
   <!-- Panel retour -->
   <div id="panel-retour" class="detail-panel glass hidden">
-    <span class="panel-tag tag-retour">🔄 Retour marchandise</span>
-    <div class="form-row">
-      <div class="field">
-        <label class="field-label">Transporteur</label>
-        <div class="select-wrap">
-          <select id="transporteur">
-            <option value="">— Sélectionner —</option>
-            <option>Dispam</option>
-            <option>Bernard</option>
-            <option>Coquelle Peyro</option>
-            <option>Portugal</option>
-            <option>Hollande</option>
-            <option>Compans</option>
-            <option>DTS</option>
-            <option>Omnitrans</option>
-            <option>TFE</option>
-            <option>Ceva</option>
-            <option>Sagil</option>
-            <option>Autre</option>
-          </select>
+    <div class="panel-tabs">
+      <button class="panel-tab active" onclick="switchTab('retour','info',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+        Informations
+      </button>
+      <button class="panel-tab" onclick="switchTab('retour','comment',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Commentaire
+      </button>
+    </div>
+    <div id="tab-retour-info" class="tab-pane">
+      <div class="form-row">
+        <div class="field">
+          <label class="field-label">Transporteur</label>
+          <div class="select-wrap">
+            <select id="transporteur">
+              <option value="">— Sélectionner —</option>
+              <option>Dispam</option><option>Bernard</option><option>Coquelle Peyro</option>
+              <option>Portugal</option><option>Hollande</option><option>Compans</option>
+              <option>DTS</option><option>Omnitrans</option><option>TFE</option>
+              <option>Ceva</option><option>Sagil</option><option>Autre</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Date du retour</label>
+          <input type="date" id="date-retour" />
         </div>
       </div>
-      <div class="field">
-        <label class="field-label">Date du retour</label>
-        <input type="date" id="date-retour" />
-      </div>
+    </div>
+    <div id="tab-retour-comment" class="tab-pane hidden">
+      <textarea id="comment-retour" class="comment-area" placeholder="Ajoutez un commentaire ou une observation…"></textarea>
     </div>
   </div>
 
   <!-- Panel doublon -->
   <div id="panel-doublon" class="detail-panel glass hidden">
-    <span class="panel-tag tag-doublon">🔁 Doublon silo</span>
-    <div class="info-box">
-      <span class="info-icon">ℹ️</span>
-      <div>
-        <strong>Doublon silo identifié</strong>
-        Cette palette est un doublon dans le silo. Aucune information complémentaire requise.
+    <div class="panel-tabs">
+      <button class="panel-tab active" onclick="switchTab('doublon','info',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+        Informations
+      </button>
+      <button class="panel-tab" onclick="switchTab('doublon','comment',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Commentaire
+      </button>
+    </div>
+    <div id="tab-doublon-info" class="tab-pane">
+      <div class="info-box">
+        <span class="info-icon">ℹ️</span>
+        <div><strong>Doublon silo identifié</strong>Cette palette est un doublon dans le silo. Aucune information complémentaire requise.</div>
       </div>
+    </div>
+    <div id="tab-doublon-comment" class="tab-pane hidden">
+      <textarea id="comment-doublon" class="comment-area" placeholder="Ajoutez un commentaire ou une observation…"></textarea>
     </div>
   </div>
 
   <!-- Panel attente -->
   <div id="panel-attente" class="detail-panel glass hidden">
-    <span class="panel-tag tag-attente">⏳ En attente de réception</span>
-    <div class="info-box">
-      <span class="info-icon">⏳</span>
-      <div>
-        <strong>En attente de réception</strong>
-        Cette palette sera traitée lors de la prochaine réception. Aucune action immédiate requise.
+    <div class="panel-tabs">
+      <button class="panel-tab active" onclick="switchTab('attente','info',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+        Informations
+      </button>
+      <button class="panel-tab" onclick="switchTab('attente','comment',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Commentaire
+      </button>
+    </div>
+    <div id="tab-attente-info" class="tab-pane">
+      <div class="info-box">
+        <span class="info-icon">⏳</span>
+        <div><strong>En attente de réception</strong>Cette palette sera traitée lors de la prochaine réception. Aucune action immédiate requise.</div>
       </div>
+    </div>
+    <div id="tab-attente-comment" class="tab-pane hidden">
+      <textarea id="comment-attente" class="comment-area" placeholder="Ajoutez un commentaire ou une observation…"></textarea>
     </div>
   </div>
 
   <!-- Panel UM -->
   <div id="panel-um" class="detail-panel glass hidden">
-    <span class="panel-tag tag-um">🔍 UM non trouvé</span>
-    <div class="info-box">
-      <span class="info-icon">⚠️</span>
-      <div>
-        <strong>UM non trouvé dans l'entrepôt</strong>
-        Merci de signaler ce cas au responsable logistique. Un suivi est nécessaire.
+    <div class="panel-tabs">
+      <button class="panel-tab active" onclick="switchTab('um','info',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+        Informations
+      </button>
+      <button class="panel-tab" onclick="switchTab('um','comment',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Commentaire
+      </button>
+    </div>
+    <div id="tab-um-info" class="tab-pane">
+      <div class="info-box">
+        <span class="info-icon">⚠️</span>
+        <div><strong>UM non trouvé dans l'entrepôt</strong>Merci de signaler ce cas au responsable logistique. Un suivi est nécessaire.</div>
       </div>
+    </div>
+    <div id="tab-um-comment" class="tab-pane hidden">
+      <textarea id="comment-um" class="comment-area" placeholder="Ajoutez un commentaire ou une observation…"></textarea>
     </div>
   </div>
 
@@ -1047,6 +1163,13 @@
   };
 
   let currentType = null;
+
+  function switchTab(type, tab, btn) {
+    btn.closest('.panel-tabs').querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${type}-info`).classList.toggle('hidden', tab !== 'info');
+    document.getElementById(`tab-${type}-comment`).classList.toggle('hidden', tab !== 'comment');
+  }
 
   function initDate() {
     const now = new Date();
@@ -1178,12 +1301,24 @@
       'Enregistré le':   `<svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
       'Heure':           `<svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>`,
     };
-    document.getElementById('tag-body').innerHTML = fields.map(f => `
-      <div class="tag-row">
+    /* ── commentaire ── */
+    const comment = (document.getElementById(`comment-${t}`)?.value ?? '').trim();
+    if (comment) fields.push({ key: 'Commentaire', val: comment });
+
+    const COMMENT_ICON = `<svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`;
+
+    document.getElementById('tag-body').innerHTML = fields.map(f => {
+      if (f.key === 'Commentaire') {
+        return `<div class="tag-row tag-row-full">
+          <span class="tag-row-label">${COMMENT_ICON} Commentaire</span>
+          <span class="tag-row-value">${f.val.replace(/\n/g,'<br>')}</span>
+        </div>`;
+      }
+      return `<div class="tag-row">
         <span class="tag-row-label">${FIELD_ICONS[f.key] ?? ''} ${f.key}</span>
         <span class="tag-row-value">${f.val}</span>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
 
     /* ── pied : date/heure à la place de la référence ── */
     const dateStr = now.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
@@ -1285,13 +1420,39 @@
     y += rows.length * 22 + 18;
 
     // Comment zone
-    doc.setDrawColor(255, 255, 255, .12);
-    doc.setLineWidth(0.4);
-    doc.roundedRect(mX, y, W - mX*2, 44, 3, 3, 'D');
-    doc.setFont('helvetica', 'italic');
-    doc.setFontSize(8);
-    doc.setTextColor(100, 116, 139);
-    doc.text('Commentaire / observations :', mX + 5, y + 10);
+    const pdfComment = (document.getElementById(`comment-${t}`)?.value ?? '').trim();
+    if (pdfComment) {
+      doc.setFillColor(255, 255, 255, .04);
+      doc.roundedRect(mX, y, W - mX*2, 10, 2, 2, 'F');
+      doc.setDrawColor(255, 255, 255, .12);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(mX, y, W - mX*2, 10, 2, 2, 'D');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(138, 151, 180);
+      doc.text('COMMENTAIRE', mX + 5, y + 6.5);
+      y += 14;
+      const lines = doc.splitTextToSize(pdfComment, W - mX*2 - 10);
+      const commentH = lines.length * 6 + 12;
+      doc.setFillColor(255, 255, 255, .03);
+      doc.roundedRect(mX, y, W - mX*2, commentH, 2, 2, 'F');
+      doc.setDrawColor(255, 255, 255, .1);
+      doc.roundedRect(mX, y, W - mX*2, commentH, 2, 2, 'D');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(220, 225, 235);
+      doc.text(lines, mX + 5, y + 8);
+      y += commentH + 14;
+    } else {
+      doc.setDrawColor(255, 255, 255, .12);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(mX, y, W - mX*2, 36, 3, 3, 'D');
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Commentaire / observations :', mX + 5, y + 10);
+      y += 50;
+    }
 
     // Footer
     doc.setFillColor(255, 255, 255, .04);
@@ -1315,6 +1476,17 @@
     document.getElementById('result-wrapper').classList.add('hidden');
     document.getElementById('transporteur').value = '';
     document.getElementById('date-retour').value  = '';
+    /* vider les commentaires + remettre onglet Info actif */
+    ['retour','doublon','attente','um'].forEach(type => {
+      const ta = document.getElementById(`comment-${type}`);
+      if (ta) ta.value = '';
+      const tabs = document.querySelectorAll(`#panel-${type} .panel-tab`);
+      tabs.forEach((tab, i) => tab.classList.toggle('active', i === 0));
+      const info    = document.getElementById(`tab-${type}-info`);
+      const comment = document.getElementById(`tab-${type}-comment`);
+      if (info)    info.classList.remove('hidden');
+      if (comment) comment.classList.add('hidden');
+    });
     window.scrollTo({ top:0, behavior:'smooth' });
   }
 </script>
