@@ -15,6 +15,8 @@
       --c-attente: #f59e0b;
       --c-um:      #ef4444;
       --c-bloquee: #dc2626;
+      --c-entree:  #22c55e;
+      --c-divers:  #64748b;
       --c-blue:    #3b82f6;
       --radius:    16px;
       --radius-sm: 10px;
@@ -230,6 +232,8 @@
     .option-tile[data-type="attente"] { --tc: var(--c-attente); --tca: rgba(245,158,11,.22); --tcs: rgba(245,158,11,.6); }
     .option-tile[data-type="um"]      { --tc: var(--c-um);      --tca: rgba(239,68,68,.22);  --tcs: rgba(239,68,68,.6);  }
     .option-tile[data-type="bloquee"] { --tc: var(--c-bloquee); --tca: rgba(220,38,38,.22);  --tcs: rgba(220,38,38,.6);  }
+    .option-tile[data-type="entree"]  { --tc: var(--c-entree);  --tca: rgba(34,197,94,.22);  --tcs: rgba(34,197,94,.6);  }
+    .option-tile[data-type="divers"]  { --tc: var(--c-divers);  --tca: rgba(100,116,139,.22); --tcs: rgba(100,116,139,.6); }
 
     .option-tile {
       background: rgba(255,255,255,.07);
@@ -975,6 +979,20 @@
       </div>
       <div class="tile-check">✓</div>
     </div>
+    <div class="option-tile" data-type="entree" onclick="selectType('entree')">
+      <div class="tile-icon">✅</div>
+      <div class="tile-text">
+        <div class="tile-label">Entrée silo<br>OK</div>
+      </div>
+      <div class="tile-check">✓</div>
+    </div>
+    <div class="option-tile" data-type="divers" onclick="selectType('divers')">
+      <div class="tile-icon">📝</div>
+      <div class="tile-text">
+        <div class="tile-label">Divers</div>
+      </div>
+      <div class="tile-check">✓</div>
+    </div>
   </div>
 
   <!-- ÉTAPE 2 -->
@@ -1112,6 +1130,37 @@
     </div>
   </div>
 
+  <!-- Panel entrée silo -->
+  <div id="panel-entree" class="detail-panel glass hidden">
+    <div class="panel-tabs">
+      <button class="panel-tab active" onclick="switchTab('entree','info',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+        Informations
+      </button>
+      <button class="panel-tab" onclick="switchTab('entree','comment',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Commentaire
+      </button>
+    </div>
+    <div id="tab-entree-info" class="tab-pane">
+      <div class="info-box">
+        <span class="info-icon">✅</span>
+        <div><strong>Entrée silo OK</strong>La palette est conforme et peut être rentrée en silo.</div>
+      </div>
+    </div>
+    <div id="tab-entree-comment" class="tab-pane hidden">
+      <textarea id="comment-entree" class="comment-area" placeholder="Ajoutez un commentaire ou une observation…"></textarea>
+    </div>
+  </div>
+
+  <!-- Panel divers -->
+  <div id="panel-divers" class="detail-panel glass hidden">
+    <div class="field">
+      <label class="field-label">Motif / Commentaire / Détail</label>
+      <textarea id="comment-divers" class="comment-area" placeholder="Précisez le motif, le commentaire ou le détail…"></textarea>
+    </div>
+  </div>
+
   <!-- GÉNÉRER -->
   <button id="btn-gen" class="btn-generate hidden" onclick="generate()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -1193,6 +1242,8 @@
     attente: { label:'En attente de réception',   icon:'⏳', color:[245,158,11],  hex:'#f59e0b', grad:'linear-gradient(135deg,#f59e0b,#ea580c)' },
     um:      { label:'UM non trouvé en entrepôt', icon:'🔍', color:[239,68,68],   hex:'#ef4444', grad:'linear-gradient(135deg,#ef4444,#be123c)' },
     bloquee: { label:'Palette bloquée',           icon:'🔒', color:[220,38,38],   hex:'#dc2626', grad:'linear-gradient(135deg,#dc2626,#7f1d1d)' },
+    entree:  { label:'Entrée silo OK',            icon:'✅', color:[34,197,94],   hex:'#22c55e', grad:'linear-gradient(135deg,#22c55e,#15803d)' },
+    divers:  { label:'Divers',                    icon:'📝', color:[100,116,139], hex:'#64748b', grad:'linear-gradient(135deg,#64748b,#334155)' },
   };
 
   let currentType = null;
@@ -1216,7 +1267,7 @@
     document.querySelectorAll('.option-tile').forEach(t => t.classList.remove('active'));
     document.querySelector(`.option-tile[data-type="${type}"]`).classList.add('active');
 
-    ['retour','doublon','attente','um','bloquee'].forEach(t =>
+    ['retour','doublon','attente','um','bloquee','entree','divers'].forEach(t =>
       document.getElementById(`panel-${t}`).classList.add('hidden')
     );
     document.getElementById(`panel-${type}`).classList.remove('hidden');
@@ -1246,6 +1297,13 @@
         { key:'Transporteur',    val: tr },
         { key:'Date du retour',  val: formatDate(date) },
         { key:'Heure d\'édition', val: now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) },
+      ];
+    } else if (t === 'divers') {
+      const note = document.getElementById('comment-divers').value.trim();
+      if (!note) { alert('Veuillez renseigner le motif, le commentaire ou le détail.'); return; }
+      fields = [
+        { key:'Enregistré le', val: now.toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) },
+        { key:'Heure',         val: now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) },
       ];
     } else {
       fields = [
@@ -1323,6 +1381,26 @@
           <path d="M26 48V34a24 24 0 0148 0v14"/>
           <circle cx="50" cy="76" r="8" fill="currentColor" opacity=".6"/>
           <line x1="50" y1="84" x2="50" y2="94"/>
+        </svg>`,
+      },
+      entree: {
+        badge: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="8,12.5 11,15.5 16,9"/>
+        </svg>`,
+        watermark: `<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="50" cy="50" r="42"/>
+          <polyline points="32,52 45,65 70,35"/>
+        </svg>`,
+      },
+      divers: {
+        badge: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/>
+        </svg>`,
+        watermark: `<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 92h60"/>
+          <path d="M68 12a10 10 0 0114 14L34 74l-19 5 5-19z"/>
         </svg>`,
       },
     };
@@ -1672,13 +1750,24 @@
       doc.setLineWidth(0.5);
       doc.circle(cx, lY + lH*.42, r*.1, 'F');
       doc.line(cx, lY + lH*.42, cx, lY + lH*.72);
+    } else if (type === 'entree') {
+      // Cercle + coche
+      doc.circle(cx, cy, r*.8, 'D');
+      doc.setLineWidth(1.3);
+      doc.line(cx - r*.4, cy + r*.05, cx - r*.1, cy + r*.4);
+      doc.line(cx - r*.1, cy + r*.4, cx + r*.5, cy - r*.35);
+    } else if (type === 'divers') {
+      // Feuille de note
+      doc.roundedRect(cx - r*.6, cy - r*.75, r*1.2, r*1.5, 1, 1, 'D');
+      doc.setLineWidth(0.6);
+      [cy - r*.3, cy, cy + r*.3].forEach(ly => doc.line(cx - r*.35, ly, cx + r*.35, ly));
     }
   }
 
   function reset() {
     currentType = null;
     document.querySelectorAll('.option-tile').forEach(t => t.classList.remove('active'));
-    ['retour','doublon','attente','um','bloquee'].forEach(t =>
+    ['retour','doublon','attente','um','bloquee','entree','divers'].forEach(t =>
       document.getElementById(`panel-${t}`).classList.add('hidden')
     );
     document.getElementById('step2-header').classList.add('hidden');
@@ -1687,7 +1776,7 @@
     document.getElementById('transporteur').value = '';
     document.getElementById('date-retour').value  = '';
     /* vider les commentaires + remettre onglet Info actif */
-    ['retour','doublon','attente','um','bloquee'].forEach(type => {
+    ['retour','doublon','attente','um','bloquee','entree','divers'].forEach(type => {
       const ta = document.getElementById(`comment-${type}`);
       if (ta) ta.value = '';
       const tabs = document.querySelectorAll(`#panel-${type} .panel-tab`);
